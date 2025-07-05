@@ -5,7 +5,11 @@ import 'aos/dist/aos.css';
 // Lucide React Icons
 import {
   User, Lock, Wallet, ReceiptText, Printer, X, Plus, DollarSign, BookOpen, Star, Sun, Moon, Sparkles,
-  HeartHandshake, Home, ShieldCheck, Banknote, CalendarDays, BarChart4, LogOut, Package, Users, Settings, ClipboardList, TrendingUp, CalendarCheck, Handshake, BellRing
+  HeartHandshake, Home, ShieldCheck, Banknote, CalendarDays, BarChart4, LogOut, Package, Users, Settings, ClipboardList, TrendingUp, CalendarCheck, Handshake, BellRing,
+  Award, ScrollText, PiggyBank, Briefcase, Feather, Landmark, GraduationCap, Gift, ClipboardCopy, CircleDollarSign,
+  HandCoins, BookUser, FileText, Globe, Gem, Leaf, Lightbulb, Zap, Cloud, Anchor, Compass, Dribbble, Figma, GitBranch,
+  Hammer, Hourglass, Key, LifeBuoy, MessageSquare, Monitor, PieChart, Puzzle, Radio, Rocket, Scissors, Target, Umbrella,
+  Vespa, Wheat, Wine, ZapOff, ZoomIn, TrendingDown,
 } from 'lucide-react';
 
 // --- Component Imports ---
@@ -90,10 +94,11 @@ const AuthModal = ({ handleLogin, loading, message, ALL_USERS }) => {
 };
 
 // DevoteeDashboard component
-const DevoteeDashboard = ({ currentUser, transactions, setTransactions, saveAllTransactions, DONATION_HEADS, GURU_DEVS, setMessage, ashramEvents }) => {
+const DevoteeDashboard = ({ currentUser, transactions, setTransactions, saveAllTransactions, GENERAL_DONATION_CATEGORIES, SPECIFIC_DONATION_PURPOSES, GURU_DEVS, setMessage, ashramEvents }) => {
   const [amount, setAmount] = useState('');
-  const [selectedHead, setSelectedHead] = useState(DONATION_HEADS[0].id);
+  const [selectedGeneralCategory, setSelectedGeneralCategory] = useState(GENERAL_DONATION_CATEGORIES[0].id);
   const [selectedGuruDevId, setSelectedGuruDevId] = useState('');
+  const [selectedSpecificPurpose, setSelectedSpecificPurpose] = useState(SPECIFIC_DONATION_PURPOSES[0].id);
   const [showReceipt, setShowReceipt] = useState(false);
   const [receiptData, setReceiptData] = useState(null);
   const [showDepositModal, setShowDepositModal] = useState(false);
@@ -102,11 +107,13 @@ const DevoteeDashboard = ({ currentUser, transactions, setTransactions, saveAllT
   const receiptRef = useRef();
 
   useEffect(() => {
-    // Set initial Guru Dev if Guru Seva is default selected
-    if (selectedHead === 'guru-seva' && GURU_DEVS.length > 0) {
+    // Set initial Guru Dev if Guru Seva is selected by default
+    if (selectedGeneralCategory === 'guru-seva' && GURU_DEVS.length > 0) {
       setSelectedGuruDevId(GURU_DEVS[0].id);
+    } else {
+      setSelectedGuruDevId(''); // Clear if not Guru Seva
     }
-  }, [selectedHead, GURU_DEVS]);
+  }, [selectedGeneralCategory, GURU_DEVS]);
 
   const handleDeposit = async (e) => {
     e.preventDefault();
@@ -126,7 +133,7 @@ const DevoteeDashboard = ({ currentUser, transactions, setTransactions, saveAllT
       return;
     }
 
-    if (selectedHead === 'guru-seva' && !selectedGuruDevId) {
+    if (selectedGeneralCategory === 'guru-seva' && !selectedGuruDevId) {
       setMessage('Please select a Guru Dev for Guru Seva donation.');
       setLoading(false);
       return;
@@ -134,42 +141,42 @@ const DevoteeDashboard = ({ currentUser, transactions, setTransactions, saveAllT
 
     try {
       const newTransaction = {
-        id: 'TRN' + Date.now() + Math.random().toString(36).substr(2, 9), // Unique ID for transaction
+        id: 'TRN' + Date.now() + Math.random().toString(36).substr(2, 9),
         amount: depositAmount,
-        head: selectedHead,
-        guruDevId: selectedHead === 'guru-seva' ? selectedGuruDevId : null,
-        timestamp: new Date().toISOString(), // Store as ISO string for consistency
+        generalCategory: selectedGeneralCategory,
+        specificPurpose: selectedSpecificPurpose,
+        guruDevId: selectedGeneralCategory === 'guru-seva' ? selectedGuruDevId : null,
+        timestamp: new Date().toISOString(),
         devoteeId: currentUser.id,
         devoteeName: currentUser.name,
       };
 
-      // Get current global transactions, add new one, and save
       const currentAllTransactions = JSON.parse(localStorage.getItem('ashram_all_transactions') || '[]');
       const updatedAllTransactions = [...currentAllTransactions, newTransaction];
-      saveAllTransactions(updatedAllTransactions); // Save to global localStorage
+      saveAllTransactions(updatedAllTransactions);
 
-      // Update local state for devotee's view (filtered transactions)
       const devoteeTransactions = updatedAllTransactions.filter(txn => txn.devoteeId === currentUser.id);
       devoteeTransactions.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
       setTransactions(devoteeTransactions);
 
-
-      const headName = DONATION_HEADS.find(h => h.id === selectedHead)?.name || selectedHead;
-      const guruDevName = selectedHead === 'guru-seva' ? (GURU_DEVS.find(g => g.id === selectedGuruDevId)?.name || 'N/A') : '';
+      const generalCategoryName = GENERAL_DONATION_CATEGORIES.find(c => c.id === selectedGeneralCategory)?.name || selectedGeneralCategory;
+      const specificPurposeName = SPECIFIC_DONATION_PURPOSES.find(p => p.id === selectedSpecificPurpose)?.name || selectedSpecificPurpose;
+      const guruDevName = selectedGeneralCategory === 'guru-seva' ? (GURU_DEVS.find(g => g.id === selectedGuruDevId)?.name || 'N/A') : 'N/A';
 
       const receipt = {
         transactionId: newTransaction.id,
         date: new Date().toLocaleString(),
         devoteeName: currentUser.name,
         amount: depositAmount.toFixed(2),
-        head: headName,
+        generalCategory: generalCategoryName,
+        specificPurpose: specificPurposeName,
         guruDevName: guruDevName,
         message: 'Thank you for your generous contribution!',
       };
       setReceiptData(receipt);
       setShowReceipt(true);
       setShowDepositModal(false);
-      setAmount(''); // Clear amount field
+      setAmount('');
       setMessage('Deposit successful! Receipt generated.');
     } catch (error) {
       console.error('Error depositing money:', error);
@@ -215,9 +222,9 @@ const DevoteeDashboard = ({ currentUser, transactions, setTransactions, saveAllT
     return transactions.reduce((sum, transaction) => sum + transaction.amount, 0).toFixed(2);
   };
 
-  const getHeadIcon = (headId) => {
-    const head = DONATION_HEADS.find(h => h.id === headId);
-    return head ? head.icon : <Sparkles className="w-5 h-5 text-gray-400" />;
+  const getSpecificPurposeIcon = (purposeId) => {
+    const purpose = SPECIFIC_DONATION_PURPOSES.find(p => p.id === purposeId);
+    return purpose ? purpose.icon : <Sparkles className="w-5 h-5 text-gray-400" />;
   };
 
   return (
@@ -273,7 +280,7 @@ const DevoteeDashboard = ({ currentUser, transactions, setTransactions, saveAllT
             className="bg-gradient-to-r from-yellow-500 to-orange-500 text-purple-900 font-bold py-4 px-6 rounded-xl shadow-lg hover:from-yellow-400 hover:to-orange-400 transition duration-300 transform hover:scale-105 flex items-center justify-center gap-3 text-lg"
             data-aos="fade-up" data-aos-delay="400"
           >
-            <Plus className="w-6 h-6" /> Deposit Money
+            <Plus className="w-6 h-6" /> Make a Donation
           </button>
         </div>
 
@@ -289,9 +296,9 @@ const DevoteeDashboard = ({ currentUser, transactions, setTransactions, saveAllT
               <thead>
                 <tr className="bg-white bg-opacity-10 text-gray-200 uppercase text-sm leading-normal">
                   <th className="py-3 px-6 text-left">Date</th>
-                  <th className="py-3 px-6 text-left">Head</th>
-                  {/* Conditionally render Guru Dev column */}
-                  {transactions.some(txn => txn.guruDevId) && <th className="py-3 px-6 text-left">Guru Dev</th>}
+                  <th className="py-3 px-6 text-left">Guru Dev</th>
+                  <th className="py-3 px-6 text-left">Category</th>
+                  <th className="py-3 px-6 text-left">Purpose</th>
                   <th className="py-3 px-6 text-right">Amount (₹)</th>
                 </tr>
               </thead>
@@ -302,16 +309,16 @@ const DevoteeDashboard = ({ currentUser, transactions, setTransactions, saveAllT
                       <CalendarDays className="w-4 h-4 text-gray-400" />
                       {new Date(txn.timestamp).toLocaleString()}
                     </td>
-                    <td className="py-3 px-6 text-left flex items-center gap-2">
-                      {getHeadIcon(txn.head)}
-                      {DONATION_HEADS.find(h => h.id === txn.head)?.name || txn.head}
+                    <td className="py-3 px-6 text-left">
+                      {txn.guruDevId ? GURU_DEVS.find(g => g.id === txn.guruDevId)?.name : 'N/A'}
                     </td>
-                    {/* Conditionally render Guru Dev name */}
-                    {transactions.some(t => t.guruDevId) && (
-                      <td className="py-3 px-6 text-left">
-                        {txn.guruDevId ? GURU_DEVS.find(g => g.id === txn.guruDevId)?.name || 'N/A' : '-'}
-                      </td>
-                    )}
+                    <td className="py-3 px-6 text-left">
+                      {GENERAL_DONATION_CATEGORIES.find(c => c.id === txn.generalCategory)?.name || txn.generalCategory}
+                    </td>
+                    <td className="py-3 px-6 text-left flex items-center gap-2">
+                      {getSpecificPurposeIcon(txn.specificPurpose)}
+                      {SPECIFIC_DONATION_PURPOSES.find(p => p.id === txn.specificPurpose)?.name || txn.specificPurpose}
+                    </td>
                     <td className="py-3 px-6 text-right font-semibold text-yellow-200">
                       ₹{txn.amount.toFixed(2)}
                     </td>
@@ -329,13 +336,87 @@ const DevoteeDashboard = ({ currentUser, transactions, setTransactions, saveAllT
           <div className="bg-gradient-to-br from-indigo-800 to-purple-800 p-8 rounded-xl shadow-2xl w-full max-w-md border border-indigo-700 backdrop-filter backdrop-blur-md" data-aos="zoom-in">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-3xl font-bold text-yellow-300 flex items-center gap-2">
-                <Wallet className="w-8 h-8" /> Deposit Money
+                <Wallet className="w-8 h-8" /> Make a Donation
               </h2>
               <button onClick={() => setShowDepositModal(false)} className="text-gray-300 hover:text-white transition duration-300">
                 <X className="w-7 h-7" />
               </button>
             </div>
             <form onSubmit={handleDeposit} className="space-y-5">
+              <div>
+                <label className="block text-gray-200 text-sm font-semibold mb-2" htmlFor="general-category">
+                  <BookOpen className="inline-block w-4 h-4 mr-2" /> Select General Category
+                </label>
+                <div className="relative">
+                  <select
+                    id="general-category"
+                    className="w-full p-3 rounded-lg bg-white bg-opacity-10 border border-white border-opacity-20 text-white appearance-none focus:outline-none focus:ring-2 focus:ring-yellow-400 transition duration-300 pr-10"
+                    value={selectedGeneralCategory}
+                    onChange={(e) => setSelectedGeneralCategory(e.target.value)}
+                    required
+                  >
+                    {GENERAL_DONATION_CATEGORIES.map((category) => (
+                      <option key={category.id} value={category.id} className="bg-purple-900 text-white">
+                        {category.name}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-300">
+                    <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                  </div>
+                </div>
+              </div>
+
+              {selectedGeneralCategory === 'guru-seva' && (
+                <div>
+                  <label className="block text-gray-200 text-sm font-semibold mb-2" htmlFor="guru-dev">
+                    <Star className="inline-block w-4 h-4 mr-2" /> Select Guru Dev
+                  </label>
+                  <div className="relative">
+                    <select
+                      id="guru-dev"
+                      className="w-full p-3 rounded-lg bg-white bg-opacity-10 border border-white border-opacity-20 text-white appearance-none focus:outline-none focus:ring-2 focus:ring-yellow-400 transition duration-300 pr-10"
+                      value={selectedGuruDevId}
+                      onChange={(e) => setSelectedGuruDevId(e.target.value)}
+                      required
+                    >
+                      {GURU_DEVS.map((guru) => (
+                        <option key={guru.id} value={guru.id} className="bg-purple-900 text-white">
+                          {guru.name}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-300">
+                      <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                  </div>
+                </div>
+              </div>
+              )}
+
+              <div>
+                <label className="block text-gray-200 text-sm font-semibold mb-2" htmlFor="specific-purpose">
+                  <ScrollText className="inline-block w-4 h-4 mr-2" /> Purpose of Donation
+                </label>
+                <div className="relative">
+                  <select
+                    id="specific-purpose"
+                    className="w-full p-3 rounded-lg bg-white bg-opacity-10 border border-white border-opacity-20 text-white appearance-none focus:outline-none focus:ring-2 focus:ring-yellow-400 transition duration-300 pr-10"
+                    value={selectedSpecificPurpose}
+                    onChange={(e) => setSelectedSpecificPurpose(e.target.value)}
+                    required
+                  >
+                    {SPECIFIC_DONATION_PURPOSES.map((purpose) => (
+                      <option key={purpose.id} value={purpose.id} className="bg-purple-900 text-white">
+                        {purpose.name}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-300">
+                    <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                  </div>
+                </div>
+              </div>
+
               <div>
                 <label className="block text-gray-200 text-sm font-semibold mb-2" htmlFor="amount">
                   <DollarSign className="inline-block w-4 h-4 mr-2" /> Amount (₹)
@@ -351,56 +432,6 @@ const DevoteeDashboard = ({ currentUser, transactions, setTransactions, saveAllT
                   required
                 />
               </div>
-              <div>
-                <label className="block text-gray-200 text-sm font-semibold mb-2" htmlFor="head">
-                  <BookOpen className="inline-block w-4 h-4 mr-2" /> Donation Head
-                </label>
-                <div className="relative">
-                  <select
-                    id="head"
-                    className="w-full p-3 rounded-lg bg-white bg-opacity-10 border border-white border-opacity-20 text-white appearance-none focus:outline-none focus:ring-2 focus:ring-yellow-400 transition duration-300 pr-10"
-                    value={selectedHead}
-                    onChange={(e) => setSelectedHead(e.target.value)}
-                    required
-                  >
-                    {DONATION_HEADS.map((head) => (
-                      <option key={head.id} value={head.id} className="bg-purple-900 text-white">
-                        {head.name}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-300">
-                    <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
-                  </div>
-                </div>
-              </div>
-
-              {selectedHead === 'guru-seva' && (
-                <div>
-                  <label className="block text-gray-200 text-sm font-semibold mb-2" htmlFor="guru-dev">
-                    <Star className="inline-block w-4 h-4 mr-2" /> Select Guru Dev
-                  </label>
-                  <div className="relative">
-                    <select
-                      id="guru-dev"
-                      className="w-full p-3 rounded-lg bg-white bg-opacity-10 border border-white border-opacity-20 text-white appearance-none focus:outline-none focus:ring-2 focus:ring-yellow-400 transition duration-300 pr-10"
-                      value={selectedGuruDevId}
-                      onChange={(e) => setSelectedGuruDevId(e.target.value)}
-                      required
-                    >
-                      <option value="" className="bg-purple-900 text-white">Select a Guru Dev</option>
-                      {GURU_DEVS.map((guru) => (
-                        <option key={guru.id} value={guru.id} className="bg-purple-900 text-white">
-                          {guru.name}
-                        </option>
-                      ))}
-                    </select>
-                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-300">
-                      <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
-                  </div>
-                </div>
-              </div>
-              )}
 
               <button
                 type="submit"
@@ -414,7 +445,7 @@ const DevoteeDashboard = ({ currentUser, transactions, setTransactions, saveAllT
                   </svg>
                 ) : (
                   <>
-                    <Banknote className="w-5 h-5" /> Confirm Deposit
+                    <Banknote className="w-5 h-5" /> Confirm Donation
                   </>
                 )}
               </button>
@@ -451,15 +482,17 @@ const DevoteeDashboard = ({ currentUser, transactions, setTransactions, saveAllT
                   <span>{receiptData.devoteeName}</span>
                 </div>
                 <div className="flex justify-between border-b pb-1">
-                  <span className="font-semibold">Donation Head:</span>
-                  <span>{receiptData.head}</span>
+                  <span className="font-semibold">Guru Dev:</span>
+                  <span>{receiptData.guruDevName}</span>
                 </div>
-                {receiptData.guruDevName && (
-                  <div className="flex justify-between border-b pb-1">
-                    <span className="font-semibold">Guru Dev:</span>
-                    <span>{receiptData.guruDevName}</span>
-                  </div>
-                )}
+                <div className="flex justify-between border-b pb-1">
+                  <span className="font-semibold">Category:</span>
+                  <span>{receiptData.generalCategory}</span>
+                </div>
+                <div className="flex justify-between border-b pb-1">
+                  <span className="font-semibold">Purpose:</span>
+                  <span>{receiptData.specificPurpose}</span>
+                </div>
                 <div className="flex justify-between text-lg font-bold pt-2">
                   <span>Amount:</span>
                   <span className="text-green-600">₹{receiptData.amount}</span>
@@ -481,15 +514,20 @@ const DevoteeDashboard = ({ currentUser, transactions, setTransactions, saveAllT
 };
 
 // GuruDevDashboard component
-const GuruDevDashboard = ({ currentUser, allTransactions, GURU_DEVS, ashramEvents }) => {
-  // Filter transactions relevant to the current Guru Dev
+const GuruDevDashboard = ({ currentUser, allTransactions, GURU_DEVS, ashramEvents, SPECIFIC_DONATION_PURPOSES, GENERAL_DONATION_CATEGORIES }) => {
+  // Filter transactions relevant to the current Guru Dev (where they were selected as the GuruDevId)
   const guruDevTransactions = allTransactions.filter(
-    (txn) => txn.head === 'guru-seva' && txn.guruDevId === currentUser.id
+    (txn) => txn.guruDevId === currentUser.id
   );
 
   const totalGuruDevDonations = guruDevTransactions.reduce(
     (sum, txn) => sum + txn.amount, 0
   ).toFixed(2);
+
+  const getSpecificPurposeIcon = (purposeId) => {
+    const purpose = SPECIFIC_DONATION_PURPOSES.find(p => p.id === purposeId);
+    return purpose ? purpose.icon : <Sparkles className="w-5 h-5 text-gray-400" />;
+  };
 
   return (
     <div className="w-full max-w-6xl mx-auto bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg rounded-xl shadow-2xl p-6 sm:p-8 lg:p-10 border border-white border-opacity-20" data-aos="fade-up">
@@ -512,14 +550,14 @@ const GuruDevDashboard = ({ currentUser, allTransactions, GURU_DEVS, ashramEvent
             {ashramEvents.slice(0, 3).map((event, index) => ( // Show top 3 events
               <li key={event.id} className="mb-1 text-sm">
                 <span className="font-semibold">{event.name}</span> on {event.date} - {event.description}
-              </li>
-            ))}
-            {ashramEvents.length > 3 && (
-              <li className="text-sm italic">And more...</li>
-            )}
-          </ul>
-        </div>
-      )}
+                </li>
+              ))}
+              {ashramEvents.length > 3 && (
+                <li className="text-sm italic">And more...</li>
+              )}
+            </ul>
+          </div>
+        )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <div className="bg-gradient-to-br from-purple-700 to-indigo-700 p-6 rounded-xl shadow-xl flex items-center justify-between" data-aos="fade-up" data-aos-delay="200">
@@ -531,7 +569,7 @@ const GuruDevDashboard = ({ currentUser, allTransactions, GURU_DEVS, ashramEvent
         </div>
         <div className="bg-gradient-to-br from-green-700 to-teal-700 p-6 rounded-xl shadow-xl flex items-center justify-between" data-aos="fade-up" data-aos-delay="300">
           <div>
-            <p className="text-gray-200 text-sm font-medium">Total Guru Seva Donations</p>
+            <p className="text-gray-200 text-sm font-medium">Total Donations Received</p>
             <p className="text-yellow-300 text-3xl font-bold">₹{totalGuruDevDonations}</p>
           </div>
           <DollarSign className="w-10 h-10 text-green-300 opacity-70" />
@@ -539,10 +577,10 @@ const GuruDevDashboard = ({ currentUser, allTransactions, GURU_DEVS, ashramEvent
       </div>
 
       <h2 className="text-3xl font-bold text-yellow-300 mb-6 flex items-center gap-2" data-aos="fade-right">
-        <BarChart4 className="w-7 h-7" /> Your Guru Seva Transactions
+        <BarChart4 className="w-7 h-7" /> Your Donations Received
       </h2>
       {guruDevTransactions.length === 0 ? (
-        <p className="text-gray-300 text-center py-10" data-aos="fade-up">No Guru Seva donations received yet.</p>
+        <p className="text-gray-300 text-center py-10" data-aos="fade-up">No donations received yet.</p>
       ) : (
         <div className="overflow-x-auto rounded-xl shadow-xl border border-white border-opacity-20" data-aos="fade-up" data-aos-delay="400">
           <table className="min-w-full bg-white bg-opacity-5 rounded-xl">
@@ -550,6 +588,8 @@ const GuruDevDashboard = ({ currentUser, allTransactions, GURU_DEVS, ashramEvent
               <tr className="bg-white bg-opacity-10 text-gray-200 uppercase text-sm leading-normal">
                 <th className="py-3 px-6 text-left">Date</th>
                 <th className="py-3 px-6 text-left">Devotee Name</th>
+                <th className="py-3 px-6 text-left">Category</th>
+                <th className="py-3 px-6 text-left">Purpose</th>
                 <th className="py-3 px-6 text-right">Amount (₹)</th>
               </tr>
             </thead>
@@ -562,6 +602,13 @@ const GuruDevDashboard = ({ currentUser, allTransactions, GURU_DEVS, ashramEvent
                   </td>
                   <td className="py-3 px-6 text-left">
                     {txn.devoteeName}
+                  </td>
+                  <td className="py-3 px-6 text-left">
+                    {GENERAL_DONATION_CATEGORIES.find(c => c.id === txn.generalCategory)?.name || txn.generalCategory}
+                  </td>
+                  <td className="py-3 px-6 text-left flex items-center gap-2">
+                    {getSpecificPurposeIcon(txn.specificPurpose)}
+                    {SPECIFIC_DONATION_PURPOSES.find(p => p.id === txn.specificPurpose)?.name || txn.specificPurpose}
                   </td>
                   <td className="py-3 px-6 text-right font-semibold text-yellow-200">
                     ₹{txn.amount.toFixed(2)}
@@ -1040,13 +1087,13 @@ const DevoteeManagement = ({ ALL_USERS, allTransactions }) => {
 
 
 // AdminDashboard component
-const AdminDashboard = ({ currentUser, allTransactions, GURU_DEVS, DONATION_HEADS, setMessage, ashramEvents, saveAshramEvents, ALL_USERS }) => {
+const AdminDashboard = ({ currentUser, allTransactions, GURU_DEVS, GENERAL_DONATION_CATEGORIES, SPECIFIC_DONATION_PURPOSES, setMessage, ashramEvents, saveAshramEvents, ALL_USERS }) => {
   const [activeTab, setActiveTab] = useState('donation-reports'); // Default tab to donation reports
 
   // Calculate total donations for each Guru Dev
   const guruDevDonationSummary = GURU_DEVS.map(guru => {
     const total = allTransactions
-      .filter(txn => txn.head === 'guru-seva' && txn.guruDevId === guru.id)
+      .filter(txn => txn.guruDevId === guru.id) // Filter by GuruDevId for all purposes
       .reduce((sum, txn) => sum + txn.amount, 0);
     return { ...guru, totalDonations: total.toFixed(2) };
   });
@@ -1054,10 +1101,10 @@ const AdminDashboard = ({ currentUser, allTransactions, GURU_DEVS, DONATION_HEAD
   // Calculate total overall donations
   const totalOverallDonations = allTransactions.reduce((sum, txn) => sum + txn.amount, 0).toFixed(2);
 
-  // Helper to get head icon
-  const getHeadIcon = (headId) => {
-    const head = DONATION_HEADS.find(h => h.id === headId);
-    return head ? head.icon : <Sparkles className="w-5 h-5 text-gray-400" />;
+  // Helper to get specific purpose icon
+  const getSpecificPurposeIcon = (purposeId) => {
+    const purpose = SPECIFIC_DONATION_PURPOSES.find(p => p.id === purposeId);
+    return purpose ? purpose.icon : <Sparkles className="w-5 h-5 text-gray-400" />;
   };
 
   return (
@@ -1200,8 +1247,9 @@ const AdminDashboard = ({ currentUser, allTransactions, GURU_DEVS, DONATION_HEAD
                     <tr className="bg-white bg-opacity-10 text-gray-200 uppercase text-sm leading-normal">
                       <th className="py-3 px-6 text-left">Date</th>
                       <th className="py-3 px-6 text-left">Devotee</th>
-                      <th className="py-3 px-6 text-left">Head</th>
                       <th className="py-3 px-6 text-left">Guru Dev</th>
+                      <th className="py-3 px-6 text-left">Category</th>
+                      <th className="py-3 px-6 text-left">Purpose</th>
                       <th className="py-3 px-6 text-right">Amount (₹)</th>
                     </tr>
                   </thead>
@@ -1215,12 +1263,15 @@ const AdminDashboard = ({ currentUser, allTransactions, GURU_DEVS, DONATION_HEAD
                         <td className="py-3 px-6 text-left">
                           {txn.devoteeName}
                         </td>
-                        <td className="py-3 px-6 text-left flex items-center gap-2">
-                          {getHeadIcon(txn.head)}
-                          {DONATION_HEADS.find(h => h.id === txn.head)?.name || txn.head}
+                        <td className="py-3 px-6 text-left">
+                          {txn.guruDevId ? GURU_DEVS.find(g => g.id === txn.guruDevId)?.name : 'N/A'}
                         </td>
                         <td className="py-3 px-6 text-left">
-                          {txn.guruDevId ? GURU_DEVS.find(g => g.id === txn.guruDevId)?.name || 'N/A' : '-'}
+                          {GENERAL_DONATION_CATEGORIES.find(c => c.id === txn.generalCategory)?.name || txn.generalCategory}
+                        </td>
+                        <td className="py-3 px-6 text-left flex items-center gap-2">
+                          {getSpecificPurposeIcon(txn.specificPurpose)}
+                          {SPECIFIC_DONATION_PURPOSES.find(p => p.id === txn.specificPurpose)?.name || txn.specificPurpose}
                         </td>
                         <td className="py-3 px-6 text-right font-semibold text-yellow-200">
                           ₹{txn.amount.toFixed(2)}
@@ -1259,13 +1310,13 @@ function App() {
   const ALL_USERS = [
     { username: 'devotee@example.com', password: 'password123', name: 'Devotee Bhakt', id: 'devotee@example.com', role: 'devotee' },
     { username: 'devotee2@example.com', password: 'password123', name: 'Devotee Seeker', id: 'devotee2@example.com', role: 'devotee' },
-    { username: 'gurudev@example.com', password: 'guru123', name: 'Swami Vivekananda', id: 'guru-vivekananda', role: 'guru' },
+    { username: 'gurudev@example.com', password: 'guru123', name: 'Ritwik', id: 'guru-vivekananda', role: 'guru' },
     { username: 'gurudev2@example.com', password: 'guru123', name: 'Guru Nanak', id: 'guru-nanak', role: 'guru' },
     { username: 'admin@example.com', password: 'admin123', name: 'Admin Maharaj', id: 'admin@example.com', role: 'admin' },
   ];
 
-  // Heads for donations
-  const DONATION_HEADS = [
+  // General Categories for donations
+  const GENERAL_DONATION_CATEGORIES = [
     { id: 'guru-seva', name: 'Guru Seva', icon: <Star className="w-5 h-5 text-yellow-400" /> },
     { id: 'temple-maintenance', name: 'Temple Maintenance', icon: <Home className="w-5 h-5 text-blue-400" /> },
     { id: 'charity', name: 'Charity & Community', icon: <HeartHandshake className="w-5 h-5 text-pink-400" /> },
@@ -1273,12 +1324,32 @@ function App() {
     { id: 'general-fund', name: 'General Fund', icon: <Banknote className="w-5 h-5 text-gray-400" /> },
   ];
 
-  // List of Guru Devs for Guru Seva donations
+  // Specific Purposes for donations (the new list provided by the user)
+  const SPECIFIC_DONATION_PURPOSES = [
+    { id: 'swastyami', name: 'Swastyami', icon: <Sparkles className="w-5 h-5 text-yellow-400" /> },
+    { id: 'istavriti', name: 'Istavriti', icon: <HeartHandshake className="w-5 h-5 text-pink-400" /> },
+    { id: 'swasti-a', name: 'Swasti-A', icon: <Award className="w-5 h-5 text-amber-400" /> },
+    { id: 'y-argha', name: 'Y-Argha', icon: <ScrollText className="w-5 h-5 text-blue-400" /> },
+    { id: 'dakshina', name: 'Dakshina', icon: <PiggyBank className="w-5 h-5 text-green-400" /> },
+    { id: 'sangathani', name: 'Sangathani', icon: <Briefcase className="w-5 h-5 text-purple-400" /> },
+    { id: 'pranami', name: 'Pranami', icon: <Feather className="w-5 h-5 text-teal-400" /> },
+    { id: 'tapovan', name: 'Tapovan', icon: <Landmark className="w-5 h-5 text-brown-400" /> },
+    { id: 'a-bazar', name: 'A-Bazar', icon: <Globe className="w-5 h-5 text-gray-400" /> },
+    { id: 'b.m', name: 'B.M', icon: <GraduationCap className="w-5 h-5 text-red-400" /> },
+    { id: 'utsav', name: 'Utsav', icon: <Gift className="w-5 h-5 text-indigo-400" /> },
+    { id: 'k.p', name: 'K.P', icon: <ClipboardCopy className="w-5 h-5 text-lime-400" /> },
+    { id: 'k.b', name: 'K.B', icon: <BookUser className="w-5 h-5 text-cyan-400" /> },
+    { id: 'ch.dis', name: 'Ch. Dis', icon: <FileText className="w-5 h-5 text-amber-400" /> },
+    { id: 'ritwiki', name: 'Ritwiki', icon: <Star className="w-5 h-5 text-fuchsia-400" /> },
+    { id: 's.v', name: 'S.V', icon: <Gem className="w-5 h-5 text-emerald-400" /> },
+  ];
+
+  // List of Guru Devs
   const GURU_DEVS = [
-    { id: 'guru-vivekananda', name: 'Swami Vivekananda' },
+    { id: 'guru-vivekananda', name: 'Ritwik' },
     { id: 'guru-ramakrishna', name: 'Sri Ramakrishna Paramahamsa' },
     { id: 'guru-shankaracharya', name: 'Adi Shankara' },
-    { id: 'guru-nanak', name: 'Guru Nanak' }, // Added for demo
+    { id: 'guru-nanak', name: 'Guru Nanak' },
   ];
 
 
@@ -1443,7 +1514,8 @@ function App() {
               transactions={allTransactions.filter(txn => txn.devoteeId === currentUser.id)} // Pass only devotee's transactions
               setTransactions={setAllTransactions} // DevoteeDashboard will update allTransactions directly
               saveAllTransactions={saveAllTransactions} // Pass global save function
-              DONATION_HEADS={DONATION_HEADS}
+              GENERAL_DONATION_CATEGORIES={GENERAL_DONATION_CATEGORIES}
+              SPECIFIC_DONATION_PURPOSES={SPECIFIC_DONATION_PURPOSES}
               GURU_DEVS={GURU_DEVS}
               setMessage={setMessage}
               ashramEvents={ashramEvents}
@@ -1456,6 +1528,8 @@ function App() {
               GURU_DEVS={GURU_DEVS}
               setMessage={setMessage}
               ashramEvents={ashramEvents}
+              SPECIFIC_DONATION_PURPOSES={SPECIFIC_DONATION_PURPOSES}
+              GENERAL_DONATION_CATEGORIES={GENERAL_DONATION_CATEGORIES}
             />
           )}
           {currentUser?.role === 'admin' && (
@@ -1463,7 +1537,8 @@ function App() {
               currentUser={currentUser}
               allTransactions={allTransactions} // Pass all transactions to AdminDashboard
               GURU_DEVS={GURU_DEVS}
-              DONATION_HEADS={DONATION_HEADS} // Pass DONATION_HEADS to AdminDashboard
+              GENERAL_DONATION_CATEGORIES={GENERAL_DONATION_CATEGORIES}
+              SPECIFIC_DONATION_PURPOSES={SPECIFIC_DONATION_PURPOSES}
               setMessage={setMessage}
               ashramEvents={ashramEvents}
               saveAshramEvents={saveAshramEvents}
