@@ -9,17 +9,19 @@ import {
   Award, ScrollText, PiggyBank, Briefcase, Feather, Landmark, GraduationCap, Gift, ClipboardCopy, CircleDollarSign,
   HandCoins, BookUser, FileText, Globe, Gem, Leaf, Lightbulb, Zap, Cloud, Anchor, Compass, Dribbble, Figma, GitBranch,
   Hammer, Hourglass, Key, LifeBuoy, MessageSquare, Monitor, PieChart, Puzzle, Radio, Rocket, Scissors, Target, Umbrella,
-  Vespa, Wheat, Wine, ZapOff, ZoomIn, TrendingDown,
+  Vespa, Wheat, Wine, ZapOff, ZoomIn, TrendingDown, Edit, UserPlus, UserMinus, UserCog, ListRestart, Check, // Added Check icon
 } from 'lucide-react';
 
-// --- Component Imports ---
+// Utility to generate unique IDs
+const generateUniqueId = (prefix = '') => {
+  return prefix + Date.now() + Math.random().toString(36).substr(2, 9);
+};
+
 // AuthModal component for handling user login
 const AuthModal = ({ handleLogin, loading, message, ALL_USERS }) => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  // No longer need username, password states as login will be via buttons
 
-  const onSubmit = (e) => {
-    e.preventDefault();
+  const handleLoginClick = (username, password) => {
     handleLogin(username, password);
   };
 
@@ -29,51 +31,39 @@ const AuthModal = ({ handleLogin, loading, message, ALL_USERS }) => {
         <h2 className="text-3xl font-bold text-center text-yellow-300 mb-6 flex items-center justify-center gap-2">
           <Sun className="w-8 h-8" /> Login
         </h2>
-        <form onSubmit={onSubmit} className="space-y-5">
-          <div>
-            <label className="block text-gray-200 text-sm font-semibold mb-2" htmlFor="username">
-              <User className="inline-block w-4 h-4 mr-2" /> Username
-            </label>
-            <input
-              type="email"
-              id="username"
-              className="w-full p-3 rounded-lg bg-white bg-opacity-10 border border-white border-opacity-20 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition duration-300"
-              placeholder="e.g., devotee@example.com"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-gray-200 text-sm font-semibold mb-2" htmlFor="password">
-              <Lock className="inline-block w-4 h-4 mr-2" /> Password
-            </label>
-            <input
-              type="password"
-              id="password"
-              className="w-full p-3 rounded-lg bg-white bg-opacity-10 border border-white border-opacity-20 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition duration-300"
-              placeholder="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-purple-900 font-bold py-3 px-4 rounded-lg shadow-lg hover:from-yellow-400 hover:to-orange-400 transition duration-300 transform hover:scale-105 flex items-center justify-center gap-2"
-            disabled={loading}
-          >
-            {loading ? (
-              <svg className="animate-spin h-5 w-5 text-purple-900" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-            ) : (
-              <>
-                <ShieldCheck className="w-5 h-5" /> Login
-              </>
-            )}
-          </button>
+        <div className="space-y-5">
+          {/* Login Buttons for each role */}
+          {ALL_USERS.filter(user => user.role === 'devotee').slice(0, 1).map(devotee => (
+            <button
+              key={devotee.id}
+              onClick={() => handleLoginClick(devotee.username, devotee.password)}
+              className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold py-3 px-4 rounded-lg shadow-lg hover:from-blue-400 hover:to-purple-400 transition duration-300 transform hover:scale-105 flex items-center justify-center gap-2"
+              disabled={loading}
+            >
+              <User className="w-5 h-5" /> Login as Devotee ({devotee.username})
+            </button>
+          ))}
+          {ALL_USERS.filter(user => user.role === 'guru').slice(0, 1).map(guru => (
+            <button
+              key={guru.id}
+              onClick={() => handleLoginClick(guru.username, guru.password)}
+              className="w-full bg-gradient-to-r from-green-500 to-teal-500 text-white font-bold py-3 px-4 rounded-lg shadow-lg hover:from-green-400 hover:to-teal-400 transition duration-300 transform hover:scale-105 flex items-center justify-center gap-2"
+              disabled={loading}
+            >
+              <Star className="w-5 h-5" /> Login as Ritwik ({guru.username})
+            </button>
+          ))}
+          {ALL_USERS.filter(user => user.role === 'admin').slice(0, 1).map(admin => (
+            <button
+              key={admin.id}
+              onClick={() => handleLoginClick(admin.username, admin.password)}
+              className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-purple-900 font-bold py-3 px-4 rounded-lg shadow-lg hover:from-yellow-400 hover:to-orange-400 transition duration-300 transform hover:scale-105 flex items-center justify-center gap-2"
+              disabled={loading}
+            >
+              <ShieldCheck className="w-5 h-5" /> Login as Admin ({admin.username})
+            </button>
+          ))}
+
           {message && (
             <p className={`text-center text-sm mt-4 ${message.includes('successful') ? 'text-green-300' : 'text-red-300'}`}>
               {message}
@@ -87,14 +77,153 @@ const AuthModal = ({ handleLogin, loading, message, ALL_USERS }) => {
               </p>
             ))}
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );
 };
 
+// Devotee Profile Management Component
+const DevoteeProfile = ({ currentUser, saveAllUsers, setMessage }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [name, setName] = useState(currentUser.name);
+  const [username, setUsername] = useState(currentUser.username);
+  const [password, setPassword] = useState(currentUser.password);
+  const [relationDevotees, setRelationDevotees] = useState(currentUser.relationDevotees || []);
+  const [newRelationName, setNewRelationName] = useState('');
+  const [newRelationUsername, setNewRelationUsername] = useState('');
+
+  const handleUpdateProfile = (e) => {
+    e.preventDefault();
+    const updatedUser = { ...currentUser, name, username, password, relationDevotees };
+    saveAllUsers(prevUsers => prevUsers.map(u => u.id === currentUser.id ? updatedUser : u));
+    setMessage('Profile updated successfully!');
+    setIsEditing(false);
+  };
+
+  const handleAddRelationDevotee = (e) => {
+    e.preventDefault();
+    if (newRelationName && newRelationUsername) {
+      const newRelation = {
+        id: generateUniqueId('REL'),
+        name: newRelationName,
+        username: newRelationUsername,
+      };
+      const updatedRelationDevotees = [...relationDevotees, newRelation];
+      setRelationDevotees(updatedRelationDevotees);
+      const updatedUser = { ...currentUser, relationDevotees: updatedRelationDevotees };
+      saveAllUsers(prevUsers => prevUsers.map(u => u.id === currentUser.id ? updatedUser : u));
+      setMessage('Relation devotee added!');
+      setNewRelationName('');
+      setNewRelationUsername('');
+    } else {
+      setMessage('Please enter name and username for the relation devotee.');
+    }
+  };
+
+  const handleDeleteRelationDevotee = (id) => {
+    const updatedRelationDevotees = relationDevotees.filter(rel => rel.id !== id);
+    setRelationDevotees(updatedRelationDevotees);
+    const updatedUser = { ...currentUser, relationDevotees: updatedRelationDevotees };
+    saveAllUsers(prevUsers => prevUsers.map(u => u.id === currentUser.id ? updatedUser : u));
+    setMessage('Relation devotee removed!');
+  };
+
+  return (
+    <div className="bg-white bg-opacity-5 p-6 rounded-xl shadow-inner border border-white border-opacity-20" data-aos="fade-up">
+      <h3 className="text-2xl font-bold text-yellow-300 mb-6 flex items-center gap-2">
+        <UserCog className="w-6 h-6" /> Your Profile
+      </h3>
+
+      {isEditing ? (
+        <form onSubmit={handleUpdateProfile} className="space-y-4">
+          <div>
+            <label className="block text-gray-200 text-sm font-semibold mb-1" htmlFor="profileName">Name</label>
+            <input type="text" id="profileName" className="w-full p-2 rounded-md bg-white bg-opacity-10 border border-white border-opacity-20 text-white" value={name} onChange={(e) => setName(e.target.value)} required />
+          </div>
+          <div>
+            <label className="block text-gray-200 text-sm font-semibold mb-1" htmlFor="profileUsername">Username (Email)</label>
+            <input type="email" id="profileUsername" className="w-full p-2 rounded-md bg-white bg-opacity-10 border border-white border-opacity-20 text-white" value={username} onChange={(e) => setUsername(e.target.value)} required />
+          </div>
+          <div>
+            <label className="block text-gray-200 text-sm font-semibold mb-1" htmlFor="profilePassword">Password</label>
+            <input type="password" id="profilePassword" className="w-full p-2 rounded-md bg-white bg-opacity-10 border border-white border-opacity-20 text-white" value={password} onChange={(e) => setPassword(e.target.value)} required />
+          </div>
+          <div className="flex gap-4">
+            <button type="submit" className="flex-1 bg-gradient-to-r from-green-500 to-teal-500 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:from-green-400 hover:to-teal-400 transition duration-300 flex items-center justify-center gap-2">
+              <Check className="w-5 h-5" /> Save Changes
+            </button>
+            <button type="button" onClick={() => setIsEditing(false)} className="flex-1 bg-gray-600 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-gray-700 transition duration-300 flex items-center justify-center gap-2">
+              <X className="w-5 h-5" /> Cancel
+            </button>
+          </div>
+        </form>
+      ) : (
+        <div className="space-y-3 text-gray-200">
+          <p><span className="font-semibold">Name:</span> {currentUser.name}</p>
+          <p><span className="font-semibold">Devotee ID:</span> {currentUser.id}</p>
+          <p><span className="font-semibold">Username:</span> {currentUser.username}</p>
+          <p><span className="font-semibold">Password:</span> **********</p>
+          <button onClick={() => setIsEditing(true)} className="mt-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:from-blue-400 hover:to-purple-400 transition duration-300 flex items-center gap-2">
+            <Edit className="w-5 h-5" /> Edit Profile
+          </button>
+        </div>
+      )}
+
+      <h4 className="text-xl font-bold text-yellow-200 mt-8 mb-4 flex items-center gap-2">
+        <Users className="w-5 h-5" /> Relation Devotees
+      </h4>
+      <form onSubmit={handleAddRelationDevotee} className="space-y-3 mb-6 p-4 bg-white bg-opacity-10 rounded-lg shadow-md">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-gray-200 text-sm font-semibold mb-1" htmlFor="newRelationName">Name</label>
+            <input type="text" id="newRelationName" className="w-full p-2 rounded-md bg-white bg-opacity-10 border border-white border-opacity-20 text-white" value={newRelationName} onChange={(e) => setNewRelationName(e.target.value)} placeholder="Relation's Name" />
+          </div>
+          <div>
+            <label className="block text-gray-200 text-sm font-semibold mb-1" htmlFor="newRelationUsername">Username (Email)</label>
+            <input type="email" id="newRelationUsername" className="w-full p-2 rounded-md bg-white bg-opacity-10 border border-white border-opacity-20 text-white" value={newRelationUsername} onChange={(e) => setNewRelationUsername(e.target.value)} placeholder="Relation's Email" />
+          </div>
+        </div>
+        <button type="submit" className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:from-orange-400 hover:to-red-400 transition duration-300 flex items-center justify-center gap-2">
+          <UserPlus className="w-5 h-5" /> Add Relation Devotee
+        </button>
+      </form>
+
+      {relationDevotees.length === 0 ? (
+        <p className="text-gray-300 text-center py-4">No relation devotees added yet.</p>
+      ) : (
+        <div className="overflow-x-auto rounded-xl shadow-xl border border-white border-opacity-20">
+          <table className="min-w-full bg-white bg-opacity-5 rounded-xl">
+            <thead>
+              <tr className="bg-white bg-opacity-10 text-gray-200 uppercase text-sm leading-normal">
+                <th className="py-3 px-6 text-left">Name</th>
+                <th className="py-3 px-6 text-left">Username</th>
+                <th className="py-3 px-6 text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="text-gray-300 text-sm font-light">
+              {relationDevotees.map((rel) => (
+                <tr key={rel.id} className="border-b border-white border-opacity-10 hover:bg-white hover:bg-opacity-10 transition duration-200">
+                  <td className="py-3 px-6 text-left">{rel.name}</td>
+                  <td className="py-3 px-6 text-left">{rel.username}</td>
+                  <td className="py-3 px-6 text-center">
+                    <button onClick={() => handleDeleteRelationDevotee(rel.id)} className="text-red-400 hover:text-red-300 transition duration-300" title="Remove Relation">
+                      <UserMinus className="w-5 h-5" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+};
+
+
 // DevoteeDashboard component
-const DevoteeDashboard = ({ currentUser, transactions, setTransactions, saveAllTransactions, GENERAL_DONATION_CATEGORIES, SPECIFIC_DONATION_PURPOSES, GURU_DEVS, setMessage, ashramEvents }) => {
+const DevoteeDashboard = ({ currentUser, transactions, setTransactions, saveAllTransactions, GENERAL_DONATION_CATEGORIES, SPECIFIC_DONATION_PURPOSES, GURU_DEVS, setMessage, ashramEvents, saveAllUsers }) => {
   const [amount, setAmount] = useState('');
   const [selectedGeneralCategory, setSelectedGeneralCategory] = useState(GENERAL_DONATION_CATEGORIES[0].id);
   const [selectedGuruDevId, setSelectedGuruDevId] = useState('');
@@ -103,6 +232,7 @@ const DevoteeDashboard = ({ currentUser, transactions, setTransactions, saveAllT
   const [receiptData, setReceiptData] = useState(null);
   const [showDepositModal, setShowDepositModal] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('donations'); // 'donations', 'profile'
 
   const receiptRef = useRef();
 
@@ -134,14 +264,14 @@ const DevoteeDashboard = ({ currentUser, transactions, setTransactions, saveAllT
     }
 
     if (selectedGeneralCategory === 'guru-seva' && !selectedGuruDevId) {
-      setMessage('Please select a Guru Dev for Guru Seva donation.');
+      setMessage('Please select a Ritwik for Ritwik Seva donation.');
       setLoading(false);
       return;
     }
 
     try {
       const newTransaction = {
-        id: 'TRN' + Date.now() + Math.random().toString(36).substr(2, 9),
+        id: generateUniqueId('TRN'),
         amount: depositAmount,
         generalCategory: selectedGeneralCategory,
         specificPurpose: selectedSpecificPurpose,
@@ -157,7 +287,7 @@ const DevoteeDashboard = ({ currentUser, transactions, setTransactions, saveAllT
 
       const devoteeTransactions = updatedAllTransactions.filter(txn => txn.devoteeId === currentUser.id);
       devoteeTransactions.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-      setTransactions(devoteeTransactions);
+      setTransactions(devoteeTransactions); // This updates the filtered transactions passed to the component
 
       const generalCategoryName = GENERAL_DONATION_CATEGORIES.find(c => c.id === selectedGeneralCategory)?.name || selectedGeneralCategory;
       const specificPurposeName = SPECIFIC_DONATION_PURPOSES.find(p => p.id === selectedSpecificPurpose)?.name || selectedSpecificPurpose;
@@ -177,10 +307,10 @@ const DevoteeDashboard = ({ currentUser, transactions, setTransactions, saveAllT
       setShowReceipt(true);
       setShowDepositModal(false);
       setAmount('');
-      setMessage('Deposit successful! Receipt generated.');
+      setMessage('Donation successful! Receipt generated.');
     } catch (error) {
       console.error('Error depositing money:', error);
-      setMessage('Failed to process deposit. Please try again.');
+      setMessage('Failed to process donation. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -229,105 +359,149 @@ const DevoteeDashboard = ({ currentUser, transactions, setTransactions, saveAllT
 
   return (
     <>
-      <div className="w-full max-w-6xl mx-auto bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg rounded-xl shadow-2xl p-6 sm:p-8 lg:p-10 border border-white border-opacity-20" data-aos="fade-up">
-        <div className="flex flex-col sm:flex-row justify-between items-center mb-8 pb-4 border-b border-white border-opacity-20">
-          <h1 className="text-4xl font-extrabold text-yellow-300 mb-4 sm:mb-0 flex items-center gap-3" data-aos="fade-right">
-            <Moon className="w-10 h-10" /> Devotee Dashboard
-          </h1>
-          <div className="flex flex-col sm:flex-row items-center gap-4" data-aos="fade-left">
-            <div className="text-lg font-semibold text-gray-200">
-              Welcome, <span className="text-yellow-300">{currentUser?.name || 'Devotee'}</span>!
-            </div>
-          </div>
+      <div className="w-full max-w-6xl mx-auto bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg rounded-xl shadow-2xl p-6 sm:p-8 lg:p-10 border border-white border-opacity-20 flex flex-col md:flex-row" data-aos="fade-up">
+        {/* Sidebar for Devotee Panel */}
+        <div className="md:w-1/4 w-full bg-white bg-opacity-5 rounded-xl p-4 md:mr-6 mb-6 md:mb-0 shadow-lg border border-white border-opacity-20" data-aos="fade-right">
+          <h2 className="text-2xl font-bold text-yellow-300 mb-6 flex items-center gap-2">
+            <User className="w-6 h-6" /> Devotee Panel
+          </h2>
+          <ul className="space-y-3">
+            <li>
+              <button
+                onClick={() => setActiveTab('donations')}
+                className={`w-full text-left py-3 px-4 rounded-lg font-semibold transition duration-300 flex items-center gap-3 ${
+                  activeTab === 'donations'
+                    ? 'bg-purple-700 text-yellow-300 shadow-md'
+                    : 'text-gray-200 hover:bg-white hover:bg-opacity-10'
+                }`}
+              >
+                <Wallet className="w-5 h-5" /> My Donations
+              </button>
+            </li>
+            <li>
+              <button
+                onClick={() => setActiveTab('profile')}
+                className={`w-full text-left py-3 px-4 rounded-lg font-semibold transition duration-300 flex items-center gap-3 ${
+                  activeTab === 'profile'
+                    ? 'bg-purple-700 text-yellow-300 shadow-md'
+                    : 'text-gray-200 hover:bg-white hover:bg-opacity-10'
+                }`}
+              >
+                <UserCog className="w-5 h-5" /> My Profile
+              </button>
+            </li>
+          </ul>
         </div>
 
-        {/* Ashram Events / Notifications */}
-        {ashramEvents.length > 0 && (
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 rounded-lg shadow-md mb-8 text-white" data-aos="fade-down">
-            <h3 className="text-xl font-bold mb-2 flex items-center gap-2">
-              <BellRing className="w-6 h-6 animate-pulse" /> Upcoming Ashram Events
-            </h3>
-            <ul className="list-disc pl-5">
-              {ashramEvents.slice(0, 3).map((event, index) => ( // Show top 3 events
-                <li key={event.id} className="mb-1 text-sm">
-                  <span className="font-semibold">{event.name}</span> on {event.date} - {event.description}
-                </li>
-              ))}
-              {ashramEvents.length > 3 && (
-                <li className="text-sm italic">And more...</li>
-              )}
-            </ul>
-          </div>
-        )}
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-gradient-to-br from-indigo-700 to-purple-700 p-6 rounded-xl shadow-xl flex items-center justify-between" data-aos="fade-up" data-aos-delay="200">
-            <div>
-              <p className="text-gray-200 text-sm font-medium">Your Devotee ID</p>
-              <p className="text-yellow-300 text-xl font-bold break-all">{currentUser?.id || 'N/A'}</p>
+        {/* Main Content Area */}
+        <div className="md:w-3/4 w-full">
+          <div className="flex flex-col sm:flex-row justify-between items-center mb-8 pb-4 border-b border-white border-opacity-20">
+            <h1 className="text-4xl font-extrabold text-yellow-300 mb-4 sm:mb-0 flex items-center gap-3" data-aos="fade-right">
+              <Moon className="w-10 h-10" /> Devotee Dashboard
+            </h1>
+            <div className="flex flex-col sm:flex-row items-center gap-4" data-aos="fade-left">
+              <div className="text-lg font-semibold text-gray-200">
+                Welcome, <span className="text-yellow-300">{currentUser?.name || 'Devotee'}</span>!
+              </div>
             </div>
-            <User className="w-10 h-10 text-indigo-300 opacity-70" />
           </div>
-          <div className="bg-gradient-to-br from-green-700 to-teal-700 p-6 rounded-xl shadow-xl flex items-center justify-between" data-aos="fade-up" data-aos-delay="300">
-            <div>
-              <p className="text-gray-200 text-sm font-medium">Total Deposits</p>
-              <p className="text-yellow-300 text-3xl font-bold">₹{getTotalDeposits()}</p>
-            </div>
-            <DollarSign className="w-10 h-10 text-green-300 opacity-70" />
-          </div>
-          <button
-            onClick={() => setShowDepositModal(true)}
-            className="bg-gradient-to-r from-yellow-500 to-orange-500 text-purple-900 font-bold py-4 px-6 rounded-xl shadow-lg hover:from-yellow-400 hover:to-orange-400 transition duration-300 transform hover:scale-105 flex items-center justify-center gap-3 text-lg"
-            data-aos="fade-up" data-aos-delay="400"
-          >
-            <Plus className="w-6 h-6" /> Make a Donation
-          </button>
-        </div>
 
-        {/* Transactions Table */}
-        <h2 className="text-3xl font-bold text-yellow-300 mb-6 flex items-center gap-2" data-aos="fade-right">
-          <BarChart4 className="w-7 h-7" /> Your Transactions
-        </h2>
-        {transactions.length === 0 ? (
-          <p className="text-gray-300 text-center py-10" data-aos="fade-up">No transactions recorded yet. Make your first deposit!</p>
-        ) : (
-          <div className="overflow-x-auto rounded-xl shadow-xl border border-white border-opacity-20" data-aos="fade-up" data-aos-delay="500">
-            <table className="min-w-full bg-white bg-opacity-5 rounded-xl">
-              <thead>
-                <tr className="bg-white bg-opacity-10 text-gray-200 uppercase text-sm leading-normal">
-                  <th className="py-3 px-6 text-left">Date</th>
-                  <th className="py-3 px-6 text-left">Guru Dev</th>
-                  <th className="py-3 px-6 text-left">Category</th>
-                  <th className="py-3 px-6 text-left">Purpose</th>
-                  <th className="py-3 px-6 text-right">Amount (₹)</th>
-                </tr>
-              </thead>
-              <tbody className="text-gray-300 text-sm font-light">
-                {transactions.map((txn) => (
-                  <tr key={txn.id} className="border-b border-white border-opacity-10 hover:bg-white hover:bg-opacity-10 transition duration-200">
-                    <td className="py-3 px-6 text-left whitespace-nowrap flex items-center gap-2">
-                      <CalendarDays className="w-4 h-4 text-gray-400" />
-                      {new Date(txn.timestamp).toLocaleString()}
-                    </td>
-                    <td className="py-3 px-6 text-left">
-                      {txn.guruDevId ? GURU_DEVS.find(g => g.id === txn.guruDevId)?.name : 'N/A'}
-                    </td>
-                    <td className="py-3 px-6 text-left">
-                      {GENERAL_DONATION_CATEGORIES.find(c => c.id === txn.generalCategory)?.name || txn.generalCategory}
-                    </td>
-                    <td className="py-3 px-6 text-left flex items-center gap-2">
-                      {getSpecificPurposeIcon(txn.specificPurpose)}
-                      {SPECIFIC_DONATION_PURPOSES.find(p => p.id === txn.specificPurpose)?.name || txn.specificPurpose}
-                    </td>
-                    <td className="py-3 px-6 text-right font-semibold text-yellow-200">
-                      ₹{txn.amount.toFixed(2)}
-                    </td>
-                  </tr>
+          {/* Ashram Events / Notifications */}
+          {ashramEvents.length > 0 && (
+            <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 rounded-lg shadow-md mb-8 text-white" data-aos="fade-down">
+              <h3 className="text-xl font-bold mb-2 flex items-center gap-2">
+                <BellRing className="w-6 h-6 animate-pulse" /> Upcoming Ashram Events
+              </h3>
+              <ul className="list-disc pl-5">
+                {ashramEvents.slice(0, 3).map((event, index) => ( // Show top 3 events
+                  <li key={event.id} className="mb-1 text-sm">
+                    <span className="font-semibold">{event.name}</span> on {event.date} - {event.description}
+                  </li>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+                {ashramEvents.length > 3 && (
+                  <li className="text-sm italic">And more...</li>
+                )}
+              </ul>
+            </div>
+          )}
+
+          {activeTab === 'donations' && (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div className="bg-gradient-to-br from-indigo-700 to-purple-700 p-6 rounded-xl shadow-xl flex items-center justify-between" data-aos="fade-up" data-aos-delay="200">
+                  <div>
+                    <p className="text-gray-200 text-sm font-medium">Your Devotee ID</p>
+                    <p className="text-yellow-300 text-xl font-bold break-all">{currentUser?.id || 'N/A'}</p>
+                  </div>
+                  <User className="w-10 h-10 text-indigo-300 opacity-70" />
+                </div>
+                <div className="bg-gradient-to-br from-green-700 to-teal-700 p-6 rounded-xl shadow-xl flex items-center justify-between" data-aos="fade-up" data-aos-delay="300">
+                  <div>
+                    <p className="text-gray-200 text-sm font-medium">Total Donations</p>
+                    <p className="text-yellow-300 text-3xl font-bold">₹{getTotalDeposits()}</p>
+                  </div>
+                  <DollarSign className="w-10 h-10 text-green-300 opacity-70" />
+                </div>
+                <button
+                  onClick={() => setShowDepositModal(true)}
+                  className="bg-gradient-to-r from-yellow-500 to-orange-500 text-purple-900 font-bold py-4 px-6 rounded-xl shadow-lg hover:from-yellow-400 hover:to-orange-400 transition duration-300 transform hover:scale-105 flex items-center justify-center gap-3 text-lg"
+                  data-aos="fade-up" data-aos-delay="400"
+                >
+                  <Plus className="w-6 h-6" /> Make a Donation
+                </button>
+              </div>
+
+              {/* Transactions Table */}
+              <h2 className="text-3xl font-bold text-yellow-300 mb-6 flex items-center gap-2" data-aos="fade-right">
+                <BarChart4 className="w-7 h-7" /> Your Transactions
+              </h2>
+              {transactions.length === 0 ? (
+                <p className="text-gray-300 text-center py-10" data-aos="fade-up">No transactions recorded yet. Make your first donation!</p>
+              ) : (
+                <div className="overflow-x-auto rounded-xl shadow-xl border border-white border-opacity-20" data-aos="fade-up" data-aos-delay="500">
+                  <table className="min-w-full bg-white bg-opacity-5 rounded-xl">
+                    <thead>
+                      <tr className="bg-white bg-opacity-10 text-gray-200 uppercase text-sm leading-normal">
+                        <th className="py-3 px-6 text-left">Date</th>
+                        <th className="py-3 px-6 text-left">Ritwik</th>
+                        <th className="py-3 px-6 text-left">Category</th>
+                        <th className="py-3 px-6 text-left">Purpose</th>
+                        <th className="py-3 px-6 text-right">Amount (₹)</th>
+                      </tr>
+                    </thead>
+                    <tbody className="text-gray-300 text-sm font-light">
+                      {transactions.map((txn) => (
+                        <tr key={txn.id} className="border-b border-white border-opacity-10 hover:bg-white hover:bg-opacity-10 transition duration-200">
+                          <td className="py-3 px-6 text-left whitespace-nowrap flex items-center gap-2">
+                            <CalendarDays className="w-4 h-4 text-gray-400" />
+                            {new Date(txn.timestamp).toLocaleString()}
+                          </td>
+                          <td className="py-3 px-6 text-left">
+                            {txn.guruDevId ? GURU_DEVS.find(g => g.id === txn.guruDevId)?.name : 'N/A'}
+                          </td>
+                          <td className="py-3 px-6 text-left">
+                            {GENERAL_DONATION_CATEGORIES.find(c => c.id === txn.generalCategory)?.name || txn.generalCategory}
+                          </td>
+                          <td className="py-3 px-6 text-left flex items-center gap-2">
+                            {getSpecificPurposeIcon(txn.specificPurpose)}
+                            {SPECIFIC_DONATION_PURPOSES.find(p => p.id === txn.specificPurpose)?.name || txn.specificPurpose}
+                          </td>
+                          <td className="py-3 px-6 text-right font-semibold text-yellow-200">
+                            ₹{txn.amount.toFixed(2)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </>
+          )}
+
+          {activeTab === 'profile' && (
+            <DevoteeProfile currentUser={currentUser} saveAllUsers={saveAllUsers} setMessage={setMessage} />
+          )}
+        </div>
       </div>
 
       {/* Deposit Modal */}
@@ -370,7 +544,7 @@ const DevoteeDashboard = ({ currentUser, transactions, setTransactions, saveAllT
               {selectedGeneralCategory === 'guru-seva' && (
                 <div>
                   <label className="block text-gray-200 text-sm font-semibold mb-2" htmlFor="guru-dev">
-                    <Star className="inline-block w-4 h-4 mr-2" /> Select Guru Dev
+                    <Star className="inline-block w-4 h-4 mr-2" /> Select Ritwik
                   </label>
                   <div className="relative">
                     <select
@@ -482,7 +656,7 @@ const DevoteeDashboard = ({ currentUser, transactions, setTransactions, saveAllT
                   <span>{receiptData.devoteeName}</span>
                 </div>
                 <div className="flex justify-between border-b pb-1">
-                  <span className="font-semibold">Guru Dev:</span>
+                  <span className="font-semibold">Ritwik:</span>
                   <span>{receiptData.guruDevName}</span>
                 </div>
                 <div className="flex justify-between border-b pb-1">
@@ -514,7 +688,7 @@ const DevoteeDashboard = ({ currentUser, transactions, setTransactions, saveAllT
 };
 
 // GuruDevDashboard component
-const GuruDevDashboard = ({ currentUser, allTransactions, GURU_DEVS, ashramEvents, SPECIFIC_DONATION_PURPOSES, GENERAL_DONATION_CATEGORIES }) => {
+const GuruDevDashboard = ({ currentUser, allTransactions, GURU_DEVS, ashramEvents, SPECIFIC_DONATION_PURPOSES, GENERAL_DONATION_CATEGORIES, withdrawalRequests, saveWithdrawalRequests, setMessage }) => {
   // Filter transactions relevant to the current Guru Dev (where they were selected as the GuruDevId)
   const guruDevTransactions = allTransactions.filter(
     (txn) => txn.guruDevId === currentUser.id
@@ -529,14 +703,57 @@ const GuruDevDashboard = ({ currentUser, allTransactions, GURU_DEVS, ashramEvent
     return purpose ? purpose.icon : <Sparkles className="w-5 h-5 text-gray-400" />;
   };
 
+  const [showWithdrawalModal, setShowWithdrawalModal] = useState(false);
+  const [withdrawalAmount, setWithdrawalAmount] = useState('');
+  const [withdrawalReason, setWithdrawalReason] = useState('');
+  const [loadingWithdrawal, setLoadingWithdrawal] = useState(false);
+
+  const handleRequestWithdrawal = (e) => {
+    e.preventDefault();
+    setLoadingWithdrawal(true);
+    setMessage('');
+
+    const amount = parseFloat(withdrawalAmount);
+    if (isNaN(amount) || amount <= 0) {
+      setMessage('Please enter a valid positive amount for withdrawal.');
+      setLoadingWithdrawal(false);
+      return;
+    }
+
+    if (amount > parseFloat(totalGuruDevDonations)) {
+      setMessage('Requested amount exceeds total donations received.');
+      setLoadingWithdrawal(false);
+      return;
+    }
+
+    const newRequest = {
+      id: generateUniqueId('WDR'),
+      guruDevId: currentUser.id,
+      guruDevName: currentUser.name,
+      amount: amount,
+      reason: withdrawalReason,
+      timestamp: new Date().toISOString(),
+      status: 'pending', // pending, accepted, rejected
+    };
+
+    saveWithdrawalRequests(prevRequests => [...prevRequests, newRequest]);
+    setMessage('Withdrawal request submitted successfully!');
+    setWithdrawalAmount('');
+    setWithdrawalReason('');
+    setShowWithdrawalModal(false);
+    setLoadingWithdrawal(false);
+  };
+
+  const myWithdrawalRequests = withdrawalRequests.filter(req => req.guruDevId === currentUser.id);
+
   return (
     <div className="w-full max-w-6xl mx-auto bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg rounded-xl shadow-2xl p-6 sm:p-8 lg:p-10 border border-white border-opacity-20" data-aos="fade-up">
       <div className="flex flex-col sm:flex-row justify-between items-center mb-8 pb-4 border-b border-white border-opacity-20">
         <h1 className="text-4xl font-extrabold text-yellow-300 mb-4 sm:mb-0 flex items-center gap-3" data-aos="fade-right">
-          <Star className="w-10 h-10" /> Guru Dev Dashboard
+          <Star className="w-10 h-10" /> Ritwik Dashboard
         </h1>
         <div className="text-lg font-semibold text-gray-200" data-aos="fade-left">
-          Welcome, <span className="text-yellow-300">{currentUser?.name || 'Guru Dev'}</span>!
+          Welcome, <span className="text-yellow-300">{currentUser?.name || 'Ritwik'}</span>!
         </div>
       </div>
 
@@ -559,10 +776,10 @@ const GuruDevDashboard = ({ currentUser, allTransactions, GURU_DEVS, ashramEvent
           </div>
         )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="bg-gradient-to-br from-purple-700 to-indigo-700 p-6 rounded-xl shadow-xl flex items-center justify-between" data-aos="fade-up" data-aos-delay="200">
           <div>
-            <p className="text-gray-200 text-sm font-medium">Your Guru Dev ID</p>
+            <p className="text-gray-200 text-sm font-medium">Your Ritwik ID</p>
             <p className="text-yellow-300 text-xl font-bold break-all">{currentUser?.id || 'N/A'}</p>
           </div>
           <User className="w-10 h-10 text-purple-300 opacity-70" />
@@ -574,6 +791,13 @@ const GuruDevDashboard = ({ currentUser, allTransactions, GURU_DEVS, ashramEvent
           </div>
           <DollarSign className="w-10 h-10 text-green-300 opacity-70" />
         </div>
+        <button
+            onClick={() => setShowWithdrawalModal(true)}
+            className="bg-gradient-to-r from-red-500 to-orange-500 text-white font-bold py-4 px-6 rounded-xl shadow-lg hover:from-red-400 hover:to-orange-400 transition duration-300 transform hover:scale-105 flex items-center justify-center gap-3 text-lg"
+            data-aos="fade-up" data-aos-delay="400"
+          >
+            <Banknote className="w-6 h-6" /> Request Withdrawal
+          </button>
       </div>
 
       <h2 className="text-3xl font-bold text-yellow-300 mb-6 flex items-center gap-2" data-aos="fade-right">
@@ -617,6 +841,114 @@ const GuruDevDashboard = ({ currentUser, allTransactions, GURU_DEVS, ashramEvent
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      <h2 className="text-3xl font-bold text-yellow-300 mt-8 mb-6 flex items-center gap-2" data-aos="fade-right">
+        <ListRestart className="w-7 h-7" /> Your Withdrawal Requests
+      </h2>
+      {myWithdrawalRequests.length === 0 ? (
+        <p className="text-gray-300 text-center py-10" data-aos="fade-up">No withdrawal requests made yet.</p>
+      ) : (
+        <div className="overflow-x-auto rounded-xl shadow-xl border border-white border-opacity-20" data-aos="fade-up" data-aos-delay="400">
+          <table className="min-w-full bg-white bg-opacity-5 rounded-xl">
+            <thead>
+              <tr className="bg-white bg-opacity-10 text-gray-200 uppercase text-sm leading-normal">
+                <th className="py-3 px-6 text-left">Date</th>
+                <th className="py-3 px-6 text-left">Amount (₹)</th>
+                <th className="py-3 px-6 text-left">Reason</th>
+                <th className="py-3 px-6 text-center">Status</th>
+              </tr>
+            </thead>
+            <tbody className="text-gray-300 text-sm font-light">
+              {myWithdrawalRequests.map((req) => (
+                <tr key={req.id} className="border-b border-white border-opacity-10 hover:bg-white hover:bg-opacity-10 transition duration-200">
+                  <td className="py-3 px-6 text-left whitespace-nowrap">
+                    {new Date(req.timestamp).toLocaleString()}
+                  </td>
+                  <td className="py-3 px-6 text-left font-semibold text-yellow-200">
+                    ₹{req.amount.toFixed(2)}
+                  </td>
+                  <td className="py-3 px-6 text-left">
+                    {req.reason}
+                  </td>
+                  <td className="py-3 px-6 text-center">
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                      req.status === 'pending' ? 'bg-yellow-500 text-yellow-900' :
+                      req.status === 'accepted' ? 'bg-green-500 text-green-900' :
+                      'bg-red-500 text-red-900'
+                    }`}>
+                      {req.status.charAt(0).toUpperCase() + req.status.slice(1)}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+
+      {/* Withdrawal Request Modal */}
+      {showWithdrawalModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-40 p-4">
+          <div className="bg-gradient-to-br from-red-800 to-orange-800 p-8 rounded-xl shadow-2xl w-full max-w-md border border-red-700 backdrop-filter backdrop-blur-md" data-aos="zoom-in">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-3xl font-bold text-yellow-300 flex items-center gap-2">
+                <Banknote className="w-8 h-8" /> Request Withdrawal
+              </h2>
+              <button onClick={() => setShowWithdrawalModal(false)} className="text-gray-300 hover:text-white transition duration-300">
+                <X className="w-7 h-7" />
+              </button>
+            </div>
+            <form onSubmit={handleRequestWithdrawal} className="space-y-5">
+              <div>
+                <label className="block text-gray-200 text-sm font-semibold mb-2" htmlFor="withdrawalAmount">
+                  <DollarSign className="inline-block w-4 h-4 mr-2" /> Amount (₹)
+                </label>
+                <input
+                  type="number"
+                  id="withdrawalAmount"
+                  className="w-full p-3 rounded-lg bg-white bg-opacity-10 border border-white border-opacity-20 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition duration-300"
+                  placeholder="e.g., 5000.00"
+                  value={withdrawalAmount}
+                  onChange={(e) => setWithdrawalAmount(e.target.value)}
+                  step="0.01"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-200 text-sm font-semibold mb-2" htmlFor="withdrawalReason">
+                  <FileText className="inline-block w-4 h-4 mr-2" /> Reason
+                </label>
+                <textarea
+                  id="withdrawalReason"
+                  rows="3"
+                  className="w-full p-3 rounded-lg bg-white bg-opacity-10 border border-white border-opacity-20 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition duration-300"
+                  placeholder="Reason for withdrawal..."
+                  value={withdrawalReason}
+                  onChange={(e) => setWithdrawalReason(e.target.value)}
+                  required
+                ></textarea>
+              </div>
+              <button
+                type="submit"
+                className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-purple-900 font-bold py-3 px-4 rounded-lg shadow-lg hover:from-yellow-400 hover:to-orange-400 transition duration-300 transform hover:scale-105 flex items-center justify-center gap-2"
+                disabled={loadingWithdrawal}
+              >
+                {loadingWithdrawal ? (
+                  <svg className="animate-spin h-5 w-5 text-purple-900" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                ) : (
+                  <>
+                    <HandCoins className="w-5 h-5" /> Submit Request
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
         </div>
       )}
     </div>
@@ -665,7 +997,7 @@ const InventoryManager = ({ setMessage }) => {
     }
 
     const newItem = {
-      id: 'INV' + Date.now() + Math.random().toString(36).substr(2, 9),
+      id: generateUniqueId('INV'),
       name: itemName,
       quantity: parseInt(itemQuantity),
       price: parseFloat(itemPrice).toFixed(2),
@@ -846,7 +1178,7 @@ const AshramEventsManager = ({ ashramEvents, saveAshramEvents, setMessage }) => 
     }
 
     const newEvent = {
-      id: 'EVT' + Date.now() + Math.random().toString(36).substr(2, 9),
+      id: generateUniqueId('EVT'),
       name: eventName,
       date: eventDate,
       description: eventDescription,
@@ -1008,73 +1340,162 @@ const AshramEventsManager = ({ ashramEvents, saveAshramEvents, setMessage }) => 
   );
 };
 
-// DevoteeManagement component for Admin
-const DevoteeManagement = ({ ALL_USERS, allTransactions }) => {
-  // Filter only devotee users
+// DevoteeManagement component for Admin (CRUD)
+const DevoteeCRUD = ({ ALL_USERS, saveAllUsers, setMessage }) => {
+  const [devoteeName, setDevoteeName] = useState('');
+  const [devoteeUsername, setDevoteeUsername] = useState('');
+  const [devoteePassword, setDevoteePassword] = useState('');
+  const [editingDevotee, setEditingDevotee] = useState(null);
+
   const devoteeUsers = ALL_USERS.filter(user => user.role === 'devotee');
 
-  // Calculate total transactions per devotee
-  const devoteeTransactionSummary = devoteeUsers.map(devotee => {
-    const transactions = allTransactions.filter(txn => txn.devoteeId === devotee.id);
-    const totalAmount = transactions.reduce((sum, txn) => sum + txn.amount, 0).toFixed(2);
-    const numberOfTransactions = transactions.length;
-    return {
-      ...devotee,
-      totalAmountDonated: totalAmount,
-      numberOfTransactions: numberOfTransactions
+  const handleAddDevotee = (e) => {
+    e.preventDefault();
+    if (!devoteeName || !devoteeUsername || !devoteePassword) {
+      setMessage('Please fill all fields for the new devotee.');
+      return;
+    }
+    if (ALL_USERS.some(user => user.username === devoteeUsername)) {
+      setMessage('Username (email) already exists. Please use a different one.');
+      return;
+    }
+
+    const newDevotee = {
+      id: generateUniqueId('DEV'), // Unique ID for devotee
+      username: devoteeUsername,
+      password: devoteePassword,
+      name: devoteeName,
+      role: 'devotee',
+      relationDevotees: [], // Initialize with empty array for relation devotees
     };
-  });
+    saveAllUsers([...ALL_USERS, newDevotee]);
+    setMessage('Devotee added successfully!');
+    setDevoteeName('');
+    setDevoteeUsername('');
+    setDevoteePassword('');
+  };
+
+  const handleEditDevotee = (devotee) => {
+    setEditingDevotee(devotee);
+    setDevoteeName(devotee.name);
+    setDevoteeUsername(devotee.username);
+    setDevoteePassword(devotee.password);
+  };
+
+  const handleUpdateDevotee = (e) => {
+    e.preventDefault();
+    if (!devoteeName || !devoteeUsername || !devoteePassword) {
+      setMessage('Please fill all fields for the devotee.');
+      return;
+    }
+    if (ALL_USERS.some(user => user.username === devoteeUsername && user.id !== editingDevotee.id)) {
+      setMessage('Username (email) already exists for another user. Please use a different one.');
+      return;
+    }
+
+    const updatedUsers = ALL_USERS.map(user =>
+      user.id === editingDevotee.id
+        ? { ...user, name: devoteeName, username: devoteeUsername, password: devoteePassword }
+        : user
+    );
+    saveAllUsers(updatedUsers);
+    setMessage('Devotee updated successfully!');
+    setEditingDevotee(null);
+    setDevoteeName('');
+    setDevoteeUsername('');
+    setDevoteePassword('');
+  };
+
+  const handleDeleteDevotee = (id) => {
+    // In a real app, you'd want to confirm this action and handle associated data (transactions)
+    const updatedUsers = ALL_USERS.filter(user => user.id !== id);
+    saveAllUsers(updatedUsers);
+    setMessage('Devotee deleted successfully!');
+  };
 
   return (
     <div className="bg-white bg-opacity-5 p-6 rounded-xl shadow-inner border border-white border-opacity-20" data-aos="fade-up">
       <h3 className="text-2xl font-bold text-yellow-300 mb-6 flex items-center gap-2">
-        <Users className="w-6 h-6" /> Devotee Management
+        <Users className="w-6 h-6" /> Devotee Management (CRUD)
       </h3>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <div className="bg-gradient-to-br from-indigo-700 to-purple-700 p-6 rounded-xl shadow-xl flex items-center justify-between" data-aos="fade-up" data-aos-delay="100">
-          <div>
-            <p className="text-gray-200 text-sm font-medium">Total Registered Devotees</p>
-            <p className="text-yellow-300 text-3xl font-bold">{devoteeUsers.length}</p>
-          </div>
-          <Users className="w-10 h-10 text-indigo-300 opacity-70" />
+      {/* Add/Edit Devotee Form */}
+      <form onSubmit={editingDevotee ? handleUpdateDevotee : handleAddDevotee} className="space-y-4 mb-8 p-4 bg-white bg-opacity-10 rounded-lg shadow-md">
+        <div>
+          <label className="block text-gray-200 text-sm font-semibold mb-1" htmlFor="devoteeName">Name</label>
+          <input type="text" id="devoteeName" className="w-full p-2 rounded-md bg-white bg-opacity-10 border border-white border-opacity-20 text-white" value={devoteeName} onChange={(e) => setDevoteeName(e.target.value)} placeholder="Devotee Name" required />
         </div>
-        <div className="bg-gradient-to-br from-pink-700 to-red-700 p-6 rounded-xl shadow-xl flex items-center justify-between" data-aos="fade-up" data-aos-delay="200">
-          <div>
-            <p className="text-gray-200 text-sm font-medium">Devotees with Donations</p>
-            <p className="text-yellow-300 text-3xl font-bold">
-              {new Set(allTransactions.filter(txn => ALL_USERS.find(u => u.id === txn.devoteeId)?.role === 'devotee').map(txn => txn.devoteeId)).size}
-            </p>
-          </div>
-          <Handshake className="w-10 h-10 text-pink-300 opacity-70" />
+        <div>
+          <label className="block text-gray-200 text-sm font-semibold mb-1" htmlFor="devoteeUsername">Username (Email)</label>
+          <input type="email" id="devoteeUsername" className="w-full p-2 rounded-md bg-white bg-opacity-10 border border-white border-opacity-20 text-white" value={devoteeUsername} onChange={(e) => setDevoteeUsername(e.target.value)} placeholder="devotee@example.com" required />
         </div>
-      </div>
+        <div>
+          <label className="block text-gray-200 text-sm font-semibold mb-1" htmlFor="devoteePassword">Password</label>
+          <input type="text" id="devoteePassword" className="w-full p-2 rounded-md bg-white bg-opacity-10 border border-white border-opacity-20 text-white" value={devoteePassword} onChange={(e) => setDevoteePassword(e.target.value)} placeholder="password" required />
+        </div>
+        <button
+          type="submit"
+          className="w-full bg-gradient-to-r from-blue-500 to-teal-500 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:from-blue-400 hover:to-teal-400 transition duration-300 flex items-center justify-center gap-2"
+        >
+          {editingDevotee ? (
+            <>
+              <Settings className="w-5 h-5" /> Update Devotee
+            </>
+          ) : (
+            <>
+              <UserPlus className="w-5 h-5" /> Add Devotee
+            </>
+          )}
+        </button>
+        {editingDevotee && (
+          <button
+            type="button"
+            onClick={() => { setEditingDevotee(null); setDevoteeName(''); setDevoteeUsername(''); setDevoteePassword(''); }}
+            className="w-full mt-2 bg-gray-600 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-gray-700 transition duration-300 flex items-center justify-center gap-2"
+          >
+            <X className="w-5 h-5" /> Cancel Edit
+          </button>
+        )}
+      </form>
 
-      <h4 className="text-xl font-bold text-yellow-200 mb-4 flex items-center gap-2">
-        <User className="w-5 h-5" /> Devotee Details
-      </h4>
-      {devoteeTransactionSummary.length === 0 ? (
-        <p className="text-gray-300 text-center py-6">No devotee data available.</p>
+      {/* Devotee List */}
+      {devoteeUsers.length === 0 ? (
+        <p className="text-gray-300 text-center py-10">No devotee accounts found.</p>
       ) : (
         <div className="overflow-x-auto rounded-xl shadow-xl border border-white border-opacity-20">
           <table className="min-w-full bg-white bg-opacity-5 rounded-xl">
             <thead>
               <tr className="bg-white bg-opacity-10 text-gray-200 uppercase text-sm leading-normal">
-                <th className="py-3 px-6 text-left">Devotee Name</th>
+                <th className="py-3 px-6 text-left">Name</th>
+                <th className="py-3 px-6 text-left">Username</th>
                 <th className="py-3 px-6 text-left">Devotee ID</th>
-                <th className="py-3 px-6 text-right">Total Donated (₹)</th>
-                <th className="py-3 px-6 text-right">No. of Transactions</th>
+                <th className="py-3 px-6 text-center">Actions</th>
               </tr>
             </thead>
             <tbody className="text-gray-300 text-sm font-light">
-              {devoteeTransactionSummary.map((devotee) => (
+              {devoteeUsers.map((devotee) => (
                 <tr key={devotee.id} className="border-b border-white border-opacity-10 hover:bg-white hover:bg-opacity-10 transition duration-200">
                   <td className="py-3 px-6 text-left">{devotee.name}</td>
+                  <td className="py-3 px-6 text-left">{devotee.username}</td>
                   <td className="py-3 px-6 text-left break-all">{devotee.id}</td>
-                  <td className="py-3 px-6 text-right font-semibold text-yellow-200">
-                    ₹{devotee.totalAmountDonated}
+                  <td className="py-3 px-6 text-center">
+                    <div className="flex items-center justify-center gap-3">
+                      <button
+                        onClick={() => handleEditDevotee(devotee)}
+                        className="text-blue-400 hover:text-blue-300 transition duration-300"
+                        title="Edit Devotee"
+                      >
+                        <Settings className="w-5 h-5" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteDevotee(devotee.id)}
+                        className="text-red-400 hover:text-red-300 transition duration-300"
+                        title="Delete Devotee"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    </div>
                   </td>
-                  <td className="py-3 px-6 text-right">{devotee.numberOfTransactions}</td>
                 </tr>
               ))}
             </tbody>
@@ -1085,10 +1506,254 @@ const DevoteeManagement = ({ ALL_USERS, allTransactions }) => {
   );
 };
 
+// ExpenseManager component for Admin
+const ExpenseManager = ({ expenses, saveExpenses, setMessage }) => {
+  const [expenseAmount, setExpenseAmount] = useState('');
+  const [expenseDescription, setExpenseDescription] = useState('');
+  const [expenseDate, setExpenseDate] = useState('');
+  const [editingExpense, setEditingExpense] = useState(null);
+
+  const handleAddExpense = (e) => {
+    e.preventDefault();
+    if (!expenseAmount || isNaN(parseFloat(expenseAmount)) || parseFloat(expenseAmount) <= 0 || !expenseDescription || !expenseDate) {
+      setMessage('Please enter valid amount, description, and date for the expense.');
+      return;
+    }
+
+    const newExpense = {
+      id: generateUniqueId('EXP'),
+      amount: parseFloat(expenseAmount),
+      description: expenseDescription,
+      date: expenseDate,
+      timestamp: new Date().toISOString(),
+    };
+    saveExpenses([...expenses, newExpense]);
+    setMessage('Expense added successfully!');
+    setExpenseAmount('');
+    setExpenseDescription('');
+    setExpenseDate('');
+  };
+
+  const handleEditExpense = (expense) => {
+    setEditingExpense(expense);
+    setExpenseAmount(expense.amount);
+    setExpenseDescription(expense.description);
+    setExpenseDate(expense.date);
+  };
+
+  const handleUpdateExpense = (e) => {
+    e.preventDefault();
+    if (!expenseAmount || isNaN(parseFloat(expenseAmount)) || parseFloat(expenseAmount) <= 0 || !expenseDescription || !expenseDate) {
+      setMessage('Please enter valid amount, description, and date for the expense.');
+      return;
+    }
+
+    const updatedExpenses = expenses.map(exp =>
+      exp.id === editingExpense.id
+        ? { ...exp, amount: parseFloat(expenseAmount), description: expenseDescription, date: expenseDate }
+        : exp
+    );
+    saveExpenses(updatedExpenses);
+    setMessage('Expense updated successfully!');
+    setEditingExpense(null);
+    setExpenseAmount('');
+    setExpenseDescription('');
+    setExpenseDate('');
+  };
+
+  const handleDeleteExpense = (id) => {
+    const updatedExpenses = expenses.filter(exp => exp.id !== id);
+    saveExpenses(updatedExpenses);
+    setMessage('Expense deleted successfully!');
+  };
+
+  return (
+    <div className="bg-white bg-opacity-5 p-6 rounded-xl shadow-inner border border-white border-opacity-20" data-aos="fade-up">
+      <h3 className="text-2xl font-bold text-yellow-300 mb-6 flex items-center gap-2">
+        <TrendingDown className="w-6 h-6" /> Expense Management
+      </h3>
+
+      {/* Add/Edit Expense Form */}
+      <form onSubmit={editingExpense ? handleUpdateExpense : handleAddExpense} className="space-y-4 mb-8 p-4 bg-white bg-opacity-10 rounded-lg shadow-md">
+        <div>
+          <label className="block text-gray-200 text-sm font-semibold mb-1" htmlFor="expenseAmount">Amount (₹)</label>
+          <input type="number" id="expenseAmount" className="w-full p-2 rounded-md bg-white bg-opacity-10 border border-white border-opacity-20 text-white" value={expenseAmount} onChange={(e) => setExpenseAmount(e.target.value)} step="0.01" min="0" placeholder="e.g., 500.00" required />
+        </div>
+        <div>
+          <label className="block text-gray-200 text-sm font-semibold mb-1" htmlFor="expenseDescription">Description</label>
+          <input type="text" id="expenseDescription" className="w-full p-2 rounded-md bg-white bg-opacity-10 border border-white border-opacity-20 text-white" value={expenseDescription} onChange={(e) => setExpenseDescription(e.target.value)} placeholder="e.g., Electricity Bill" required />
+        </div>
+        <div>
+          <label className="block text-gray-200 text-sm font-semibold mb-1" htmlFor="expenseDate">Date</label>
+          <input type="date" id="expenseDate" className="w-full p-2 rounded-md bg-white bg-opacity-10 border border-white border-opacity-20 text-white" value={expenseDate} onChange={(e) => setExpenseDate(e.target.value)} required />
+        </div>
+        <button
+          type="submit"
+          className="w-full bg-gradient-to-r from-blue-500 to-teal-500 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:from-blue-400 hover:to-teal-400 transition duration-300 flex items-center justify-center gap-2"
+        >
+          {editingExpense ? (
+            <>
+              <Settings className="w-5 h-5" /> Update Expense
+            </>
+          ) : (
+            <>
+              <Plus className="w-5 h-5" /> Add Expense
+            </>
+          )}
+        </button>
+        {editingExpense && (
+          <button
+            type="button"
+            onClick={() => { setEditingExpense(null); setExpenseAmount(''); setExpenseDescription(''); setExpenseDate(''); }}
+            className="w-full mt-2 bg-gray-600 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-gray-700 transition duration-300 flex items-center justify-center gap-2"
+          >
+            <X className="w-5 h-5" /> Cancel Edit
+          </button>
+        )}
+      </form>
+
+      {/* Expense List */}
+      {expenses.length === 0 ? (
+        <p className="text-gray-300 text-center py-10">No expenses recorded yet.</p>
+      ) : (
+        <div className="overflow-x-auto rounded-xl shadow-xl border border-white border-opacity-20">
+          <table className="min-w-full bg-white bg-opacity-5 rounded-xl">
+            <thead>
+              <tr className="bg-white bg-opacity-10 text-gray-200 uppercase text-sm leading-normal">
+                <th className="py-3 px-6 text-left">Date</th>
+                <th className="py-3 px-6 text-left">Description</th>
+                <th className="py-3 px-6 text-right">Amount (₹)</th>
+                <th className="py-3 px-6 text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="text-gray-300 text-sm font-light">
+              {expenses.map((exp) => (
+                <tr key={exp.id} className="border-b border-white border-opacity-10 hover:bg-white hover:bg-opacity-10 transition duration-200">
+                  <td className="py-3 px-6 text-left">{exp.date}</td>
+                  <td className="py-3 px-6 text-left">{exp.description}</td>
+                  <td className="py-3 px-6 text-right">₹{exp.amount.toFixed(2)}</td>
+                  <td className="py-3 px-6 text-center">
+                    <div className="flex items-center justify-center gap-3">
+                      <button
+                        onClick={() => handleEditExpense(exp)}
+                        className="text-blue-400 hover:text-blue-300 transition duration-300"
+                        title="Edit Expense"
+                      >
+                        <Settings className="w-5 h-5" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteExpense(exp.id)}
+                        className="text-red-400 hover:text-red-300 transition duration-300"
+                        title="Delete Expense"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// WithdrawalRequestsManager component for Admin
+const WithdrawalRequestsManager = ({ withdrawalRequests, saveWithdrawalRequests, setMessage, ALL_USERS }) => {
+
+  const handleUpdateStatus = (requestId, newStatus) => {
+    const updatedRequests = withdrawalRequests.map(req =>
+      req.id === requestId ? { ...req, status: newStatus } : req
+    );
+    saveWithdrawalRequests(updatedRequests);
+    setMessage(`Withdrawal request ${newStatus} successfully!`);
+  };
+
+  const getGuruDevName = (guruDevId) => {
+    const guru = ALL_USERS.find(user => user.id === guruDevId && user.role === 'guru');
+    return guru ? guru.name : 'Unknown Guru Dev';
+  };
+
+  return (
+    <div className="bg-white bg-opacity-5 p-6 rounded-xl shadow-inner border border-white border-opacity-20" data-aos="fade-up">
+      <h3 className="text-2xl font-bold text-yellow-300 mb-6 flex items-center gap-2">
+        <ListRestart className="w-6 h-6" /> Withdrawal Requests
+      </h3>
+
+      {withdrawalRequests.length === 0 ? (
+        <p className="text-gray-300 text-center py-10">No withdrawal requests pending.</p>
+      ) : (
+        <div className="overflow-x-auto rounded-xl shadow-xl border border-white border-opacity-20">
+          <table className="min-w-full bg-white bg-opacity-5 rounded-xl">
+            <thead>
+              <tr className="bg-white bg-opacity-10 text-gray-200 uppercase text-sm leading-normal">
+                <th className="py-3 px-6 text-left">Date</th>
+                <th className="py-3 px-6 text-left">Ritwik</th>
+                <th className="py-3 px-6 text-right">Amount (₹)</th>
+                <th className="py-3 px-6 text-left">Reason</th>
+                <th className="py-3 px-6 text-center">Status</th>
+                <th className="py-3 px-6 text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="text-gray-300 text-sm font-light">
+              {withdrawalRequests.map((req) => (
+                <tr key={req.id} className="border-b border-white border-opacity-10 hover:bg-white hover:bg-opacity-10 transition duration-200">
+                  <td className="py-3 px-6 text-left whitespace-nowrap">
+                    {new Date(req.timestamp).toLocaleString()}
+                  </td>
+                  <td className="py-3 px-6 text-left">
+                    {getGuruDevName(req.guruDevId)}
+                  </td>
+                  <td className="py-3 px-6 text-right font-semibold text-yellow-200">
+                    ₹{req.amount.toFixed(2)}
+                  </td>
+                  <td className="py-3 px-6 text-left">
+                    {req.reason}
+                  </td>
+                  <td className="py-3 px-6 text-center">
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                      req.status === 'pending' ? 'bg-yellow-500 text-yellow-900' :
+                      req.status === 'accepted' ? 'bg-green-500 text-green-900' :
+                      'bg-red-500 text-red-900'
+                    }`}>
+                      {req.status.charAt(0).toUpperCase() + req.status.slice(1)}
+                    </span>
+                  </td>
+                  <td className="py-3 px-6 text-center">
+                    {req.status === 'pending' && (
+                      <div className="flex items-center justify-center gap-3">
+                        <button
+                          onClick={() => handleUpdateStatus(req.id, 'accepted')}
+                          className="text-green-400 hover:text-green-300 transition duration-300"
+                          title="Accept"
+                        >
+                          <Check className="w-5 h-5" />
+                        </button>
+                        <button
+                          onClick={() => handleUpdateStatus(req.id, 'rejected')}
+                          className="text-red-400 hover:text-red-300 transition duration-300"
+                          title="Reject"
+                        >
+                          <X className="w-5 h-5" />
+                        </button>
+                      </div>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+};
 
 // AdminDashboard component
-const AdminDashboard = ({ currentUser, allTransactions, GURU_DEVS, GENERAL_DONATION_CATEGORIES, SPECIFIC_DONATION_PURPOSES, setMessage, ashramEvents, saveAshramEvents, ALL_USERS }) => {
-  const [activeTab, setActiveTab] = useState('donation-reports'); // Default tab to donation reports
+const AdminDashboard = ({ currentUser, allTransactions, GURU_DEVS, GENERAL_DONATION_CATEGORIES, SPECIFIC_DONATION_PURPOSES, setMessage, ashramEvents, saveAshramEvents, ALL_USERS, saveAllUsers, expenses, saveExpenses, withdrawalRequests, saveWithdrawalRequests }) => {
+  const [activeTab, setActiveTab] = useState('accounts-overview'); // Default tab
 
   // Calculate total donations for each Guru Dev
   const guruDevDonationSummary = GURU_DEVS.map(guru => {
@@ -1100,12 +1765,125 @@ const AdminDashboard = ({ currentUser, allTransactions, GURU_DEVS, GENERAL_DONAT
 
   // Calculate total overall donations
   const totalOverallDonations = allTransactions.reduce((sum, txn) => sum + txn.amount, 0).toFixed(2);
+  // Calculate total overall expenses
+  const totalOverallExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0).toFixed(2);
 
-  // Helper to get specific purpose icon
   const getSpecificPurposeIcon = (purposeId) => {
     const purpose = SPECIFIC_DONATION_PURPOSES.find(p => p.id === purposeId);
     return purpose ? purpose.icon : <Sparkles className="w-5 h-5 text-gray-400" />;
   };
+
+  const getFilteredTransactions = (period) => {
+    const now = new Date();
+    return allTransactions.filter(txn => {
+      const txnDate = new Date(txn.timestamp);
+      if (period === 'monthly') {
+        return txnDate.getMonth() === now.getMonth() && txnDate.getFullYear() === now.getFullYear();
+      }
+      if (period === 'quarterly') {
+        const currentQuarter = Math.floor(now.getMonth() / 3);
+        const txnQuarter = Math.floor(txnDate.getMonth() / 3);
+        return txnQuarter === currentQuarter && txnDate.getFullYear() === now.getFullYear();
+      }
+      if (period === 'yearly') {
+        return txnDate.getFullYear() === now.getFullYear();
+      }
+      return true; // All
+    });
+  };
+
+  const getFilteredExpenses = (period) => {
+    const now = new Date();
+    return expenses.filter(exp => {
+      const expDate = new Date(exp.date);
+      if (period === 'monthly') {
+        return expDate.getMonth() === now.getMonth() && expDate.getFullYear() === now.getFullYear();
+      }
+      if (period === 'quarterly') {
+        const currentQuarter = Math.floor(now.getMonth() / 3);
+        const expQuarter = Math.floor(expDate.getMonth() / 3);
+        return expQuarter === currentQuarter && expDate.getFullYear() === now.getFullYear();
+      }
+      if (period === 'yearly') {
+        return expDate.getFullYear() === now.getFullYear();
+      }
+      return true; // All
+    });
+  };
+
+  const ReportSection = ({ title, data, type }) => {
+    const [filterPeriod, setFilterPeriod] = useState('all');
+
+    const filteredData = type === 'donations' ? getFilteredTransactions(filterPeriod) : getFilteredExpenses(filterPeriod);
+    const totalAmount = filteredData.reduce((sum, item) => sum + item.amount, 0).toFixed(2);
+
+    return (
+      <div className="bg-white bg-opacity-5 p-6 rounded-xl shadow-inner border border-white border-opacity-20 mb-8" data-aos="fade-up">
+        <h4 className="text-xl font-bold text-yellow-200 mb-4 flex items-center gap-2">
+          {title}
+        </h4>
+        <div className="mb-4 flex gap-3">
+          <select
+            className="p-2 rounded-md bg-white bg-opacity-10 border border-white border-opacity-20 text-white"
+            value={filterPeriod}
+            onChange={(e) => setFilterPeriod(e.target.value)}
+          >
+            <option value="all" className="bg-purple-900">All Time</option>
+            <option value="monthly" className="bg-purple-900">Current Month</option>
+            <option value="quarterly" className="bg-purple-900">Current Quarter</option>
+            <option value="yearly" className="bg-purple-900">Current Year</option>
+          </select>
+          <span className="text-gray-200 text-lg font-semibold flex items-center">
+            Total: ₹{totalAmount}
+          </span>
+        </div>
+        {filteredData.length === 0 ? (
+          <p className="text-gray-300 text-center py-6">No {type} recorded for this period.</p>
+        ) : (
+          <div className="overflow-x-auto rounded-xl shadow-xl border border-white border-opacity-20">
+            <table className="min-w-full bg-white bg-opacity-5 rounded-xl">
+              <thead>
+                <tr className="bg-white bg-opacity-10 text-gray-200 uppercase text-sm leading-normal">
+                  <th className="py-3 px-6 text-left">Date</th>
+                  <th className="py-3 px-6 text-left">{type === 'donations' ? 'Devotee' : 'Description'}</th>
+                  {type === 'donations' && <th className="py-3 px-6 text-left">Ritwik</th>}
+                  {type === 'donations' && <th className="py-3 px-6 text-left">Purpose</th>}
+                  <th className="py-3 px-6 text-right">Amount (₹)</th>
+                </tr>
+              </thead>
+              <tbody className="text-gray-300 text-sm font-light">
+                {filteredData.map((item) => (
+                  <tr key={item.id} className="border-b border-white border-opacity-10 hover:bg-white hover:bg-opacity-10 transition duration-200">
+                    <td className="py-3 px-6 text-left whitespace-nowrap">
+                      {new Date(item.timestamp || item.date).toLocaleString()}
+                    </td>
+                    <td className="py-3 px-6 text-left">
+                      {type === 'donations' ? item.devoteeName : item.description}
+                    </td>
+                    {type === 'donations' && (
+                      <td className="py-3 px-6 text-left">
+                        {item.guruDevId ? GURU_DEVS.find(g => g.id === item.guruDevId)?.name : 'N/A'}
+                      </td>
+                    )}
+                    {type === 'donations' && (
+                      <td className="py-3 px-6 text-left flex items-center gap-2">
+                        {getSpecificPurposeIcon(item.specificPurpose)}
+                        {SPECIFIC_DONATION_PURPOSES.find(p => p.id === item.specificPurpose)?.name || item.specificPurpose}
+                      </td>
+                    )}
+                    <td className="py-3 px-6 text-right font-semibold text-yellow-200">
+                      ₹{item.amount.toFixed(2)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    );
+  };
+
 
   return (
     <div className="w-full max-w-6xl mx-auto bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg rounded-xl shadow-2xl p-6 sm:p-8 lg:p-10 border border-white border-opacity-20 flex flex-col md:flex-row" data-aos="fade-up">
@@ -1117,14 +1895,14 @@ const AdminDashboard = ({ currentUser, allTransactions, GURU_DEVS, GENERAL_DONAT
         <ul className="space-y-3">
           <li>
             <button
-              onClick={() => setActiveTab('donation-reports')}
+              onClick={() => setActiveTab('accounts-overview')}
               className={`w-full text-left py-3 px-4 rounded-lg font-semibold transition duration-300 flex items-center gap-3 ${
-                activeTab === 'donation-reports'
+                activeTab === 'accounts-overview'
                   ? 'bg-purple-700 text-yellow-300 shadow-md'
                   : 'text-gray-200 hover:bg-white hover:bg-opacity-10'
               }`}
             >
-              <BarChart4 className="w-5 h-5" /> Donation Reports
+              <PieChart className="w-5 h-5" /> Accounts Overview
             </button>
           </li>
           <li>
@@ -1136,7 +1914,31 @@ const AdminDashboard = ({ currentUser, allTransactions, GURU_DEVS, GENERAL_DONAT
                   : 'text-gray-200 hover:bg-white hover:bg-opacity-10'
               }`}
             >
-              <TrendingUp className="w-5 h-5" /> All Transactions
+              <TrendingUp className="w-5 h-5" /> Latest Donations
+            </button>
+          </li>
+          <li>
+            <button
+              onClick={() => setActiveTab('expenses')}
+              className={`w-full text-left py-3 px-4 rounded-lg font-semibold transition duration-300 flex items-center gap-3 ${
+                activeTab === 'expenses'
+                  ? 'bg-purple-700 text-yellow-300 shadow-md'
+                  : 'text-gray-200 hover:bg-white hover:bg-opacity-10'
+              }`}
+            >
+              <TrendingDown className="w-5 h-5" /> Expenses
+            </button>
+          </li>
+          <li>
+            <button
+              onClick={() => setActiveTab('withdrawal-requests')}
+              className={`w-full text-left py-3 px-4 rounded-lg font-semibold transition duration-300 flex items-center gap-3 ${
+                activeTab === 'withdrawal-requests'
+                  ? 'bg-purple-700 text-yellow-300 shadow-md'
+                  : 'text-gray-200 hover:bg-white hover:bg-opacity-10'
+              }`}
+            >
+              <ListRestart className="w-5 h-5" /> Withdrawal Requests
             </button>
           </li>
           <li>
@@ -1153,14 +1955,14 @@ const AdminDashboard = ({ currentUser, allTransactions, GURU_DEVS, GENERAL_DONAT
           </li>
           <li>
             <button
-              onClick={() => setActiveTab('devotee-management')}
+              onClick={() => setActiveTab('devotee-crud')}
               className={`w-full text-left py-3 px-4 rounded-lg font-semibold transition duration-300 flex items-center gap-3 ${
-                activeTab === 'devotee-management'
+                activeTab === 'devotee-crud'
                   ? 'bg-purple-700 text-yellow-300 shadow-md'
                   : 'text-gray-200 hover:bg-white hover:bg-opacity-10'
               }`}
             >
-              <Users className="w-5 h-5" /> Devotee Management
+              <Users className="w-5 h-5" /> Devotee CRUD
             </button>
           </li>
           <li>
@@ -1189,31 +1991,40 @@ const AdminDashboard = ({ currentUser, allTransactions, GURU_DEVS, GENERAL_DONAT
           </div>
         </div>
 
-        {activeTab === 'donation-reports' && (
+        {activeTab === 'accounts-overview' && (
           <div className="bg-white bg-opacity-5 p-6 rounded-xl shadow-inner border border-white border-opacity-20" data-aos="fade-up">
             <h3 className="text-2xl font-bold text-yellow-300 mb-6 flex items-center gap-2">
-              <BarChart4 className="w-6 h-6" /> Donation Overview
+              <PieChart className="w-6 h-6" /> Accounts Overview
             </h3>
 
-            <div className="bg-gradient-to-br from-green-700 to-teal-700 p-6 rounded-xl shadow-xl flex items-center justify-between mb-8" data-aos="fade-up" data-aos-delay="100">
-              <div>
-                <p className="text-gray-200 text-sm font-medium">Total Overall Donations</p>
-                <p className="text-yellow-300 text-3xl font-bold">₹{totalOverallDonations}</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              <div className="bg-gradient-to-br from-green-700 to-teal-700 p-6 rounded-xl shadow-xl flex items-center justify-between" data-aos="fade-up" data-aos-delay="100">
+                <div>
+                  <p className="text-gray-200 text-sm font-medium">Total Overall Donations</p>
+                  <p className="text-yellow-300 text-3xl font-bold">₹{totalOverallDonations}</p>
+                </div>
+                <DollarSign className="w-10 h-10 text-green-300 opacity-70" />
               </div>
-              <DollarSign className="w-10 h-10 text-green-300 opacity-70" />
+              <div className="bg-gradient-to-br from-red-700 to-pink-700 p-6 rounded-xl shadow-xl flex items-center justify-between" data-aos="fade-up" data-aos-delay="200">
+                <div>
+                  <p className="text-gray-200 text-sm font-medium">Total Overall Expenses</p>
+                  <p className="text-yellow-300 text-3xl font-bold">₹{totalOverallExpenses}</p>
+                </div>
+                <TrendingDown className="w-10 h-10 text-red-300 opacity-70" />
+              </div>
             </div>
 
             <h4 className="text-xl font-bold text-yellow-200 mb-4 flex items-center gap-2">
-              <Star className="w-5 h-5" /> Guru Dev Donation Summary
+              <Star className="w-5 h-5" /> Ritwik Donation Summary
             </h4>
             {guruDevDonationSummary.length === 0 ? (
-              <p className="text-gray-300 text-center py-6">No Guru Dev donations recorded yet.</p>
+              <p className="text-gray-300 text-center py-6">No Ritwik donations recorded yet.</p>
             ) : (
-              <div className="overflow-x-auto rounded-xl shadow-xl border border-white border-opacity-20">
+              <div className="overflow-x-auto rounded-xl shadow-xl border border-white border-opacity-20 mb-8">
                 <table className="min-w-full bg-white bg-opacity-5 rounded-xl">
                   <thead>
                     <tr className="bg-white bg-opacity-10 text-gray-200 uppercase text-sm leading-normal">
-                      <th className="py-3 px-6 text-left">Guru Dev Name</th>
+                      <th className="py-3 px-6 text-left">Ritwik Name</th>
                       <th className="py-3 px-6 text-right">Total Donations (₹)</th>
                     </tr>
                   </thead>
@@ -1230,16 +2041,20 @@ const AdminDashboard = ({ currentUser, allTransactions, GURU_DEVS, GENERAL_DONAT
                 </table>
               </div>
             )}
+
+            <ReportSection title="Donation Reports" data={allTransactions} type="donations" />
+            <ReportSection title="Expense Reports" data={expenses} type="expenses" />
+
           </div>
         )}
 
         {activeTab === 'all-transactions' && (
           <div className="bg-white bg-opacity-5 p-6 rounded-xl shadow-inner border border-white border-opacity-20" data-aos="fade-up">
             <h3 className="text-2xl font-bold text-yellow-300 mb-6 flex items-center gap-2">
-              <TrendingUp className="w-6 h-6" /> All Ashram Transactions
+              <TrendingUp className="w-6 h-6" /> Latest Ashram Donations
             </h3>
             {allTransactions.length === 0 ? (
-              <p className="text-gray-300 text-center py-10">No transactions recorded across the ashram yet.</p>
+              <p className="text-gray-300 text-center py-10">No donations recorded across the ashram yet.</p>
             ) : (
               <div className="overflow-x-auto rounded-xl shadow-xl border border-white border-opacity-20">
                 <table className="min-w-full bg-white bg-opacity-5 rounded-xl">
@@ -1247,7 +2062,7 @@ const AdminDashboard = ({ currentUser, allTransactions, GURU_DEVS, GENERAL_DONAT
                     <tr className="bg-white bg-opacity-10 text-gray-200 uppercase text-sm leading-normal">
                       <th className="py-3 px-6 text-left">Date</th>
                       <th className="py-3 px-6 text-left">Devotee</th>
-                      <th className="py-3 px-6 text-left">Guru Dev</th>
+                      <th className="py-3 px-6 text-left">Ritwik</th>
                       <th className="py-3 px-6 text-left">Category</th>
                       <th className="py-3 px-6 text-left">Purpose</th>
                       <th className="py-3 px-6 text-right">Amount (₹)</th>
@@ -1285,9 +2100,13 @@ const AdminDashboard = ({ currentUser, allTransactions, GURU_DEVS, GENERAL_DONAT
           </div>
         )}
 
+        {activeTab === 'expenses' && <ExpenseManager expenses={expenses} saveExpenses={saveExpenses} setMessage={setMessage} />}
+
+        {activeTab === 'withdrawal-requests' && <WithdrawalRequestsManager withdrawalRequests={withdrawalRequests} saveWithdrawalRequests={saveWithdrawalRequests} setMessage={setMessage} ALL_USERS={ALL_USERS} />}
+
         {activeTab === 'inventory' && <InventoryManager setMessage={setMessage} />}
 
-        {activeTab === 'devotee-management' && <DevoteeManagement ALL_USERS={ALL_USERS} allTransactions={allTransactions} />}
+        {activeTab === 'devotee-crud' && <DevoteeCRUD ALL_USERS={ALL_USERS} saveAllUsers={saveAllUsers} setMessage={setMessage} />}
 
         {activeTab === 'ashram-events' && <AshramEventsManager ashramEvents={ashramEvents} saveAshramEvents={saveAshramEvents} setMessage={setMessage} />}
       </div>
@@ -1302,22 +2121,16 @@ function App() {
   const [currentUser, setCurrentUser] = useState(null); // Stores user data or ID
   const [allTransactions, setAllTransactions] = useState([]); // Stores ALL transactions
   const [ashramEvents, setAshramEvents] = useState([]); // Stores ALL ashram events
+  const [ALL_USERS, setALL_USERS] = useState([]); // Stores ALL users (mutable by admin)
+  const [expenses, setExpenses] = useState([]); // Stores ALL expenses
+  const [withdrawalRequests, setWithdrawalRequests] = useState([]); // Stores ALL withdrawal requests
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [isAppReady, setIsAppReady] = useState(false);
 
-  // Hardcoded users for demonstration purposes
-  const ALL_USERS = [
-    { username: 'devotee@example.com', password: 'password123', name: 'Devotee Bhakt', id: 'devotee@example.com', role: 'devotee' },
-    { username: 'devotee2@example.com', password: 'password123', name: 'Devotee Seeker', id: 'devotee2@example.com', role: 'devotee' },
-    { username: 'gurudev@example.com', password: 'guru123', name: 'Ritwik', id: 'guru-vivekananda', role: 'guru' },
-    { username: 'gurudev2@example.com', password: 'guru123', name: 'Guru Nanak', id: 'guru-nanak', role: 'guru' },
-    { username: 'admin@example.com', password: 'admin123', name: 'Admin Maharaj', id: 'admin@example.com', role: 'admin' },
-  ];
-
   // General Categories for donations
   const GENERAL_DONATION_CATEGORIES = [
-    { id: 'guru-seva', name: 'Guru Seva', icon: <Star className="w-5 h-5 text-yellow-400" /> },
+    { id: 'guru-seva', name: 'Ritwik Seva', icon: <Star className="w-5 h-5 text-yellow-400" /> },
     { id: 'temple-maintenance', name: 'Temple Maintenance', icon: <Home className="w-5 h-5 text-blue-400" /> },
     { id: 'charity', name: 'Charity & Community', icon: <HeartHandshake className="w-5 h-5 text-pink-400" /> },
     { id: 'education', name: 'Spiritual Education', icon: <BookOpen className="w-5 h-5 text-green-400" /> },
@@ -1344,7 +2157,7 @@ function App() {
     { id: 's.v', name: 'S.V', icon: <Gem className="w-5 h-5 text-emerald-400" /> },
   ];
 
-  // List of Guru Devs
+  // List of Guru Devs (Ritwiks)
   const GURU_DEVS = [
     { id: 'guru-vivekananda', name: 'Ritwik' },
     { id: 'guru-ramakrishna', name: 'Sri Ramakrishna Paramahamsa' },
@@ -1361,33 +2174,82 @@ function App() {
       easing: 'ease-in-out',
     });
 
-    // Attempt to load user, ALL transactions, and ALL events from localStorage on initial load
+    // Load all data from localStorage
+    loadAllUsers();
+    loadAllTransactions();
+    loadAshramEvents();
+    loadExpenses();
+    loadWithdrawalRequests();
+
+    // Attempt to load user for auto-login
     const storedLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
     const storedCurrentUser = JSON.parse(localStorage.getItem('currentUser'));
-    loadAllTransactions(); // Load all transactions globally
-    loadAshramEvents(); // Load all ashram events globally
 
     if (storedLoggedIn && storedCurrentUser) {
-      setIsLoggedIn(true);
-      setCurrentUser(storedCurrentUser);
-      setMessage(`Welcome back, ${storedCurrentUser.name}!`);
+      // Find the full user object from ALL_USERS to ensure latest data (e.g., relationDevotees)
+      const fullCurrentUser = JSON.parse(localStorage.getItem('ashram_all_users') || '[]').find(u => u.id === storedCurrentUser.id);
+      if (fullCurrentUser) {
+        setIsLoggedIn(true);
+        setCurrentUser(fullCurrentUser);
+        setMessage(`Welcome back, ${fullCurrentUser.name}!`);
+      } else {
+        // If user not found in latest ALL_USERS, log out
+        handleLogout();
+      }
     }
 
     setIsAppReady(true); // Application is ready after initial checks
-  }, []);
+  }, []); // Empty dependency array means this runs once on mount
 
-  // Function to load ALL transactions from localStorage
+  // Functions to load/save data from/to localStorage
+  const loadAllUsers = () => {
+    try {
+      const storedUsers = localStorage.getItem('ashram_all_users');
+      if (storedUsers) {
+        setALL_USERS(JSON.parse(storedUsers));
+      } else {
+        // Initial hardcoded users if no data in localStorage
+        setALL_USERS([
+          { username: 'a@gmail.com', password: '12345', name: 'Devotee Bhakt', id: generateUniqueId('DEV'), role: 'devotee', relationDevotees: [] },
+          { username: 'b@gmail.com', password: 'password123', name: 'Devotee Seeker', id: generateUniqueId('DEV'), role: 'devotee', relationDevotees: [] },
+          { username: 'guru@gmail.com', password: 'guru123', name: 'Ritwik', id: 'guru-vivekananda', role: 'guru' },
+          { username: 'gurudev2@example.com', password: 'guru123', name: 'Guru Nanak', id: 'guru-nanak', role: 'guru' },
+          { username: 'admin@gmail.com', password: '12345', name: 'Admin Maharaj', id: generateUniqueId('ADM'), role: 'admin' },
+        ]);
+      }
+    } catch (error) {
+      console.error("Error loading all users from localStorage:", error);
+      setALL_USERS([]);
+    }
+  };
+
+  const saveAllUsers = (newUsers) => {
+    try {
+      localStorage.setItem('ashram_all_users', JSON.stringify(newUsers));
+      setALL_USERS(newUsers);
+      // If the current user's data changes, update currentUser state as well
+      if (currentUser) {
+        const updatedCurrentUser = newUsers.find(u => u.id === currentUser.id);
+        if (updatedCurrentUser) {
+          setCurrentUser(updatedCurrentUser);
+          localStorage.setItem('currentUser', JSON.stringify(updatedCurrentUser));
+        }
+      }
+    } catch (error) {
+      console.error("Error saving all users to localStorage:", error);
+      setMessage("Failed to save user data locally.");
+    }
+  };
+
   const loadAllTransactions = () => {
     try {
       const storedTransactions = localStorage.getItem(`ashram_all_transactions`);
       if (storedTransactions) {
         const parsedTransactions = JSON.parse(storedTransactions);
-        // Ensure timestamps are Date objects for sorting
         const transactionsWithDates = parsedTransactions.map(txn => ({
           ...txn,
           timestamp: new Date(txn.timestamp)
         }));
-        // Sort by timestamp descending to show most recent first
         transactionsWithDates.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
         setAllTransactions(transactionsWithDates);
       } else {
@@ -1395,24 +2257,20 @@ function App() {
       }
     } catch (error) {
       console.error("Error loading all transactions from localStorage:", error);
-      setAllTransactions([]); // Clear transactions on error
-    } finally {
-      setLoading(false);
+      setAllTransactions([]);
     }
   };
 
-  // Function to save ALL transactions to localStorage
   const saveAllTransactions = (newTransactions) => {
     try {
       localStorage.setItem(`ashram_all_transactions`, JSON.stringify(newTransactions));
-      setAllTransactions(newTransactions); // Update global state
+      setAllTransactions(newTransactions);
     } catch (error) {
       console.error("Error saving all transactions to localStorage:", error);
       setMessage("Failed to save transactions locally.");
     }
   };
 
-  // Function to load ALL ashram events from localStorage
   const loadAshramEvents = () => {
     try {
       const storedEvents = localStorage.getItem('ashram_events');
@@ -1427,7 +2285,6 @@ function App() {
     }
   };
 
-  // Function to save ALL ashram events to localStorage
   const saveAshramEvents = (newEvents) => {
     try {
       localStorage.setItem('ashram_events', JSON.stringify(newEvents));
@@ -1437,6 +2294,55 @@ function App() {
       setMessage("Failed to save events locally.");
     }
   };
+
+  const loadExpenses = () => {
+    try {
+      const storedExpenses = localStorage.getItem('ashram_expenses');
+      if (storedExpenses) {
+        setExpenses(JSON.parse(storedExpenses));
+      } else {
+        setExpenses([]);
+      }
+    } catch (error) {
+      console.error("Error loading expenses from localStorage:", error);
+      setExpenses([]);
+    }
+  };
+
+  const saveExpenses = (newExpenses) => {
+    try {
+      localStorage.setItem('ashram_expenses', JSON.stringify(newExpenses));
+      setExpenses(newExpenses);
+    } catch (error) {
+      console.error("Error saving expenses to localStorage:", error);
+      setMessage("Failed to save expenses locally.");
+    }
+  };
+
+  const loadWithdrawalRequests = () => {
+    try {
+      const storedRequests = localStorage.getItem('ashram_withdrawal_requests');
+      if (storedRequests) {
+        setWithdrawalRequests(JSON.parse(storedRequests));
+      } else {
+        setWithdrawalRequests([]);
+      }
+    } catch (error) {
+      console.error("Error loading withdrawal requests from localStorage:", error);
+      setWithdrawalRequests([]);
+    }
+  };
+
+  const saveWithdrawalRequests = (newRequests) => {
+    try {
+      localStorage.setItem('ashram_withdrawal_requests', JSON.stringify(newRequests));
+      setWithdrawalRequests(newRequests);
+    } catch (error) {
+      console.error("Error saving withdrawal requests to localStorage:", error);
+      setMessage("Failed to save withdrawal requests locally.");
+    }
+  };
+
 
   const handleLogin = (username, password) => {
     setLoading(true);
@@ -1450,7 +2356,7 @@ function App() {
       setIsLoggedIn(true);
       setCurrentUser(foundUser);
       localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('currentUser', JSON.stringify(foundUser));
+      localStorage.setItem('currentUser', JSON.stringify(foundUser)); // Store full user object
       setMessage(`Welcome, ${foundUser.name}!`);
     } else {
       setMessage('Invalid username or password.');
@@ -1519,6 +2425,7 @@ function App() {
               GURU_DEVS={GURU_DEVS}
               setMessage={setMessage}
               ashramEvents={ashramEvents}
+              saveAllUsers={saveAllUsers} // Pass saveAllUsers to DevoteeProfile
             />
           )}
           {currentUser?.role === 'guru' && (
@@ -1530,6 +2437,8 @@ function App() {
               ashramEvents={ashramEvents}
               SPECIFIC_DONATION_PURPOSES={SPECIFIC_DONATION_PURPOSES}
               GENERAL_DONATION_CATEGORIES={GENERAL_DONATION_CATEGORIES}
+              withdrawalRequests={withdrawalRequests}
+              saveWithdrawalRequests={saveWithdrawalRequests}
             />
           )}
           {currentUser?.role === 'admin' && (
@@ -1543,6 +2452,11 @@ function App() {
               ashramEvents={ashramEvents}
               saveAshramEvents={saveAshramEvents}
               ALL_USERS={ALL_USERS}
+              saveAllUsers={saveAllUsers} // Pass saveAllUsers to AdminDashboard for Devotee CRUD
+              expenses={expenses}
+              saveExpenses={saveExpenses}
+              withdrawalRequests={withdrawalRequests}
+              saveWithdrawalRequests={saveWithdrawalRequests}
             />
           )}
         </>
