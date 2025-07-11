@@ -4,9 +4,9 @@ import 'aos/dist/aos.css';
 
 // Lucide React Icons
 import {
-  User, Lock, Wallet, ReceiptText, Printer, X, Plus, DollarSign, BookOpen, Star, Sun, Moon, Sparkles,
+  User, Lock, Wallet, ReceiptText, Printer, X, Plus, rupeesSign, BookOpen, Star, Sun, Moon, Sparkles,
   HeartHandshake, Home, ShieldCheck, Banknote, CalendarDays, BarChart4, LogOut, Package, Users, Settings, ClipboardList, TrendingUp, CalendarCheck, Handshake, BellRing,
-  Award, ScrollText, PiggyBank, Briefcase, Feather, Landmark, GraduationCap, Gift, ClipboardCopy, CircleDollarSign,
+  Award, ScrollText, PiggyBank, Briefcase, Feather, Landmark, GraduationCap, Gift, ClipboardCopy, CirclerupeesSign,
   HandCoins, BookUser, FileText, Globe, Gem, Leaf, Lightbulb, Zap, Cloud, Anchor, Compass, Dribbble, Figma, GitBranch,
   Hammer, Hourglass, Key, LifeBuoy, MessageSquare, Monitor, PieChart, Puzzle, Radio, Rocket, Scissors, Target, Umbrella,
   Vespa, Wheat, Wine, ZapOff, ZoomIn, TrendingDown, Edit, UserPlus, UserMinus, UserCog, ListRestart, Check, // Added Check icon
@@ -440,7 +440,7 @@ const DevoteeDashboard = ({ currentUser, transactions, setTransactions, saveAllT
                     <p className="text-gray-200 text-sm font-medium">Total Donations</p>
                     <p className="text-yellow-300 text-3xl font-bold">₹{getTotalDeposits()}</p>
                   </div>
-                  <DollarSign className="w-10 h-10 text-green-300 opacity-70" />
+                  <rupeesSign className="w-10 h-10 text-green-300 opacity-70" />
                 </div>
                 <button
                   onClick={() => setShowDepositModal(true)}
@@ -593,7 +593,7 @@ const DevoteeDashboard = ({ currentUser, transactions, setTransactions, saveAllT
 
               <div>
                 <label className="block text-gray-200 text-sm font-semibold mb-2" htmlFor="amount">
-                  <DollarSign className="inline-block w-4 h-4 mr-2" /> Amount (₹)
+                  <rupeesSign className="inline-block w-4 h-4 mr-2" /> Amount (₹)
                 </label>
                 <input
                   type="number"
@@ -789,7 +789,7 @@ const GuruDevDashboard = ({ currentUser, allTransactions, GURU_DEVS, ashramEvent
             <p className="text-gray-200 text-sm font-medium">Total Donations Received</p>
             <p className="text-yellow-300 text-3xl font-bold">₹{totalGuruDevDonations}</p>
           </div>
-          <DollarSign className="w-10 h-10 text-green-300 opacity-70" />
+          <rupeesSign className="w-10 h-10 text-green-300 opacity-70" />
         </div>
         <button
             onClick={() => setShowWithdrawalModal(true)}
@@ -904,7 +904,7 @@ const GuruDevDashboard = ({ currentUser, allTransactions, GURU_DEVS, ashramEvent
             <form onSubmit={handleRequestWithdrawal} className="space-y-5">
               <div>
                 <label className="block text-gray-200 text-sm font-semibold mb-2" htmlFor="withdrawalAmount">
-                  <DollarSign className="inline-block w-4 h-4 mr-2" /> Amount (₹)
+                  <rupeesSign className="inline-block w-4 h-4 mr-2" /> Amount (₹)
                 </label>
                 <input
                   type="number"
@@ -2003,7 +2003,7 @@ const AdminDashboard = ({ currentUser, allTransactions, GURU_DEVS, GENERAL_DONAT
                   <p className="text-gray-200 text-sm font-medium">Total Overall Donations</p>
                   <p className="text-yellow-300 text-3xl font-bold">₹{totalOverallDonations}</p>
                 </div>
-                <DollarSign className="w-10 h-10 text-green-300 opacity-70" />
+                <rupeesSign className="w-10 h-10 text-green-300 opacity-70" />
               </div>
               <div className="bg-gradient-to-br from-red-700 to-pink-700 p-6 rounded-xl shadow-xl flex items-center justify-between" data-aos="fade-up" data-aos-delay="200">
                 <div>
